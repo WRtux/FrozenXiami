@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+ <title>FrozenXiami</title>
+ <link rel="stylesheet" href="web/frame.css" />
+ <link rel="stylesheet" href="web/block.css" />
+ <link rel="stylesheet" href="web/mask.css" />
+ <link rel="stylesheet" href="web/font/player.css" />
+</head>
+
+<body>
+
+<nav id="nav">
+ <img class="nav-logo" src="web/logo.png" alt="Logo" />
+ <a class="nav-item">风格</a>
+ <a class="nav-item">歌单</a>
+ <a class="nav-item">检索</a>
+ <div class="nav-side">
+  <span id="nav-more" class="nav-item icon">⚫</span>
+  <a class="nav-item">关于</a>
+ </div>
+</nav>
+
+<main class="block-content">
+ <br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+</main>
+
+<aside id="player">
+ <div class="player-top">
+  <span id="player-progress">00:00/--:--</span>
+ </div><div class="player-side">
+  <img id="player-cover" class="player-cover" alt="封面" />
+  <div class="player-info"><span id="player-title">标题</span><span id="player-artist">艺人</span></div>
+  <span id="player-more" class="player-item icon">…</span>
+ </div><div class="player-control">
+  <span id="player-prev" class="player-control-side icon">⏪</span>
+  <span id="player-play" class="player-control-center icon">▶</span>
+  <span id="player-next" class="player-control-side icon">⏩</span>
+ </div><div class="player-side" style="justify-content: flex-end;">
+  <span class="player-item icon">⍾</span>
+ </div>
+</aside>
+
+<div id="mask-toast">
+ <template id="toast-template">
+  <div class="toast"><span>…</span></div>
+ </template>
+</div>
+
+<div id="mask-dialog">
+ <template id="dialog-template">
+  <div class="dialog-mask"><aside id="dialog-" class="dialog block-content">
+   <h2>…</h2><span class="dialog-close"></span>
+   <p>…</p>
+  </aside></div>
+ </template>
+ <div class="dialog-mask"><aside id="dialog-file" class="dialog block-content">
+  <h2>信息池文件</h2><span class="dialog-close"></span>
+  <p>仅支持带索引的信息池（<q>*.ijsom</q>）。JSON 数据需进行索引条目操作。</p>
+  <div class="block-inline"><input type="text" disabled /><input id="dialog-file-pool" type="file" /></div>
+  <h2>用户文件</h2>
+  <div class="block-inline"><input type="text" disabled /><input id="dialog-file-user" type="file" /></div>
+ </aside></div>
+</div>
+
+</body>
+
+</html>

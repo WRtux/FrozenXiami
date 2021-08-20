@@ -1,0 +1,44 @@
+@font-face {
+	font-family: "PlayerIcons";
+	src: url('../font/player.woff?18216865') format('woff'),
+		url('../font/player.ttf?18216865') format('truetype'),
+		url('../font/player.svg?18216865#player') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+.icon {
+	font-family: "PlayerIcons";
+	font-style: normal;
+	font-variant: normal;
+	text-transform: none;
+	speak: none;
+	user-select: none;
+}
+
+[class^="icon-"]::before, [class*=" icon-"]::before {
+	display: inline-block;
+	margin-right: 0.2em;
+	width: 1.0em;
+	
+	font-family: "PlayerIcons";
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	line-height: 1.0em;
+	text-align: center;
+	text-decoration: none;
+	text-transform: none;
+	speak: none;
+}
+
+.icon-ellipsis:before { content: "\2026"; } /* '…' */
+.icon-volume:before { content: "\237E"; } /* '⍾' */
+.icon-next:before { content: "\23E9"; } /* '⏩' */
+.icon-previous:before { content: "\23EA"; } /* '⏪' */
+.icon-pause:before { content: "\23F8"; } /* '⏸' */
+.icon-play:before { content: "\25B6"; } /* '▶' */
+.icon-heart:before { content: "\2661"; } /* '♡' */
+.icon-heart-fill:before { content: "\2665"; } /* '♥' */
+.icon-database:before { content: "\26AB"; } /* '⚫' */
+.icon-link:before { content: "\26D3"; } /* '⛓' */

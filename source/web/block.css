@@ -1,0 +1,74 @@
+.block-content h1, .block-content h2, .block-content p, .block-content .block-inline {
+	margin: 15px 0;
+}
+.block-content> *:first-child {
+	margin-top: 5px;
+}
+.block-content> *:last-child {
+	margin-bottom: 5px;
+}
+
+.block-content h1 {
+	font-weight: 600;
+}
+.block-content h2 {
+	font-weight: 500;
+}
+
+.block-content p {
+	font-weight: 300;
+}
+
+.block-content q {
+	font-family: monospace;
+}
+.block-content q::before, .block-content q::after {
+	content: none;
+}
+
+.block-content .block-inline {
+	display: flex;
+	align-items: center;
+}
+
+.block-inline input {
+	align-self: stretch;
+}
+.block-inline input[type=text] {
+	flex-grow: 1;
+	border: 1px solid #cccccc;
+	border-radius: 0;
+}
+.block-inline input[type=file] {
+	position: relative;
+	width: 40px;
+	cursor: pointer;
+}
+.block-inline input[type=file]::before {
+	position: absolute;
+	left: 0;
+	top: 0;
+	
+	width: 100%;
+	height: 100%;
+	
+	content: "";
+	
+	background-color: #ff4411;
+	pointer-events: none;
+}
+.block-inline input[type=file]::after {
+	position: absolute;
+	left: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	
+	width: 100%;
+	
+	content: "…";
+	font-weight: 700;
+	text-align: center;
+	
+	color: #f7f7f7;
+	pointer-events: none;
+}

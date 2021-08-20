@@ -1,2 +1,0 @@
-# XiamiRawData
-Uploaded in release.

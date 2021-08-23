@@ -69,5 +69,12 @@ function closeDialog(dlg) {
 			return;
 		this.previousElementSibling.value = this.files[0].name;
 		let dlg = alertDialog("加载中", "请稍等……", true);
+		loadPool(this.files[0], function (o) {
+			closeDialog(dlg);
+			toast("成功加载了 " + o.songs.length + " 个音乐条目。");
+		}, function (o) {
+			closeDialog(dlg);
+			alertDialog("错误", "加载失败。");
+		}, (o) => { updateDialog(dlg, "请稍等……" + o); });
 	});
 })();

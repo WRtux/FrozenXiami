@@ -71,7 +71,7 @@ function closeDialog(dlg) {
 		let dlg = alertDialog("加载中", "请稍等……", true);
 		loadPool(this.files[0], function (o) {
 			closeDialog(dlg);
-			toast("成功加载了 " + o.songs.length + " 个音乐条目。");
+			toast(`成功加载了 ${o.artists.length} 个艺人，${o.albums.length} 张专辑，${o.songs.length} 首音乐索引。`);
 		}, function (o) {
 			closeDialog(dlg);
 			alertDialog("错误", "加载失败。");

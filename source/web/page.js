@@ -69,12 +69,15 @@ function closeDialog(dlg) {
 			return;
 		this.previousElementSibling.value = this.files[0].name;
 		let dlg = alertDialog("加载中", "请稍等……", true);
-		loadPool(this.files[0], function (o) {
+		loadPool(this.files[0], function (dat) {
 			closeDialog(dlg);
-			toast(`成功加载了 ${o.artists.length} 个艺人，${o.albums.length} 张专辑，${o.songs.length} 首音乐索引。`);
-		}, function (o) {
+			let cnts = [dat.artists.length, dat.albums.length, dat.songs.length];
+			toast(`成功加载了 ${cnts[0]} 个艺人，${cnts[1]} 张专辑，${cnts[2]} 首音乐索引。`, 3000);
+		}, function () {
 			closeDialog(dlg);
 			alertDialog("错误", "加载失败。");
-		}, (o) => { updateDialog(dlg, "请稍等……" + o); });
+		}, (str) => { updateDialog(dlg, "请稍等……" + str); });
 	});
+	if (navigator.userAgent.match(/\b(?:Mobile|[Aa]ndroid|iPhone|iPad)\b/))
+		toast("正在使用移动设备访问，加载可能会较缓慢或导致内存不足。", 3000);
 })();

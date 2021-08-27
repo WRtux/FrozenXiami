@@ -178,6 +178,38 @@ function inflateEntry(en, onload, onerror) {
 	});
 }
 
+function inflateEntries(ens, onload, oerror) {
+	let ed = 0;
+	for (let en of ens) {
+		ed = Math.max(en.offset + en.length, ed);
+	}
+	if (data.pool.file.size < ed) {
+		toast("文件大小错误。");
+		onerror && onerror();
+		return;
+	}
+	let buf = new Array();
+	let cnt = 0;
+	for (let en of ens) {
+		let fr = new FileReader();
+		fr.readAsArrayBuffer(data.pool.file.slice(en.offset, en.offset + en.length));
+		fr.addEventListener("load", function (e) {
+			try {
+				let str = new TextDecoder().decode(e.target.result);
+				buf.push(JSON.parse(str));
+			} catch (err) {
+				console.error(err);
+				toast(en.name + " 存在数据错误。");
+			}
+			++cnt == ens.length && onload(buf);
+		});
+		fr.addEventListener("error", function (e) {
+			toast("读取 " + en.name + " 数据失败。");
+			++cnt == ens.length && onload(buf);
+		});
+	}
+}
+
 function queryEntryIndex(typ, id, sid) {
 	typ = getIndices(typ);
 	let ens = [typ.find((en) => en.id == id), typ.find((en) => en.sid == sid)];
@@ -199,34 +231,44 @@ function queryEntry(typ, id, sid, onload, onerror) {
 
 function searchEntryIndices(typ, ns) {
 	ns = ns.map((n) => n.toLowerCase());
-	let buf = getIndices(typ).filter(function (en) {
+	return getIndices(typ).filter(function (en) {
 		let strs = Array.from(en.keywords);
 		strs.push(en.name);
 		strs = strs.map((str) => str.toLowerCase());
-		return ns.every((n) => strs.some((str) => str.indexOf(n) != -1));
-	});
-	return buf.sort(function (a, b) {
-		let func = (en, n) => en.name.toLowerCase().indexOf(n) != -1;
-		return ns.filter(func.bind(null, b)).length - ns.filter(func.bind(null, a)).length;
+		return ns.every((n) => strs.some((str) => str.includes(n)));
 	});
 }
 
 function searchEntries(typ, ns, onload, onerror, off, lim) {
-	let ens = searchEntryIndices(typ, ns), buf = new Array();
-	let cnt = 0;
-	let func = () => buf.sort(function (a, b) {
-		let func = (en, n) => en.name.toLowerCase().indexOf(n) != -1;
-		return ns.filter(func.bind(null, b)).length - ns.filter(func.bind(null, a)).length;
-	});
-	if (off)
+	let ens = searchEntryIndices(typ, ns);
+	if (off && lim)
 		ens = ens.slice(off, off + lim);
-	for (let en of ens) {
-		inflateEntry(en, function (en) {
-			buf.push(en);
-			++cnt == ens.length && onload(func());
-		}, function () {
-			onerror && onerror();
-			++cnt == ens.length && onload(func());
-		});
-	}
+	inflateEntries(ens, onload, onerror);
+}
+
+function sortListEntries(ens, ns) {
+	ns = ns.map((n) => n.toLowerCase());
+	return ens.sort(function (a, b) {
+		let nsa = Array.from(ns), nsb = Array.from(ns);
+		let filter = (str, ns) => ns.filter((n) => str.includes(n));
+		let diff = (o, m) => o.filter((n) => !m.includes(n));
+		let resa = filter(a.name.toLowerCase(), nsa), resb = filter(b.name.toLowerCase(), nsb);
+		let scra = resa.length * 5, scrb = resb.length * 5;
+		nsa = diff(nsa, resa), nsb = diff(nsb, resb);
+		if (a.translation) {
+			resa = filter(a.translation.toLowerCase(), nsa);
+			scra += resa.length * 4;
+			nsa = diff(nsa, resa);
+		}
+		if (b.translation) {
+			resb = filter(b.translation.toLowerCase(), nsb);
+			scrb += resb.length * 4;
+			nsb = diff(nsb, resb);
+		}
+		if (a.subName)
+			scra += filter(a.subName.toLowerCase(), nsa).length * 2;
+		if (b.subName)
+			scrb += filter(b.subName.toLowerCase(), nsb).length * 2;
+		return scrb - scra;
+	});
 }

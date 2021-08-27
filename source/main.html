@@ -6,8 +6,8 @@
  <meta charset="UTF-8" />
  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
  <title>FrozenXiami</title>
- <link rel="stylesheet" href="web/frame.css" />
  <link rel="stylesheet" href="web/block.css" />
+ <link rel="stylesheet" href="web/frame.css" />
  <link rel="stylesheet" href="web/mask.css" />
  <link rel="stylesheet" href="web/font/player.css" />
 </head>
@@ -20,28 +20,37 @@
  <a class="nav-item">歌单</a>
  <a class="nav-item">检索</a>
  <div class="nav-side">
-  <span id="nav-more" class="nav-item icon">⚫</span>
+  <button id="nav-search" class="nav-item icon">⚲</button>
+  <button id="nav-more" class="nav-item icon">⚫</button>
   <a class="nav-item">关于</a>
  </div>
 </nav>
 
-<main class="block-content">
- <br />
+<main id="main">
+
+<article class="main-section block-dynamic block-content">
+ <h2>未加载文件</h2>
+ <p>加载信息池文件以开始浏览。</p>
+</article>
+
 </main>
 
 <aside id="player">
  <div class="player-top">
-  <span id="player-progress">00:00/--:--</span>
+  <span id="player-progress" class="player-progress">00:00/--:--</span>
  </div><div class="player-side">
   <img id="player-cover" class="player-cover" alt="封面" />
-  <div class="player-info"><span id="player-title">标题</span><span id="player-artist">艺人</span></div>
-  <span id="player-more" class="player-item icon">…</span>
+  <div class="player-info">
+   <span id="player-title">标题</span>
+   <span id="player-artist">艺人</span>
+  </div>
+  <button id="player-more" class="player-item icon">…</button>
  </div><div class="player-control">
-  <span id="player-prev" class="player-control-side icon">⏪</span>
-  <span id="player-play" class="player-control-center icon">▶</span>
-  <span id="player-next" class="player-control-side icon">⏩</span>
+  <button id="player-prev" class="player-control-side icon">⏪</button>
+  <button id="player-play" class="player-control-center icon">▶</button>
+  <button id="player-next" class="player-control-side icon">⏩</button>
  </div><div class="player-side" style="justify-content: flex-end;">
-  <span class="player-item icon">⍾</span>
+  <button class="player-item icon">⍾</button>
  </div>
 </aside>
 
@@ -54,16 +63,22 @@
 <div id="mask-dialog">
  <template id="dialog-template">
   <div class="dialog-mask"><aside id="dialog-" class="dialog block-content">
-   <h2>…</h2><span class="dialog-close"></span>
+   <h2>…</h2><button class="dialog-close"></button>
    <p>…</p>
   </aside></div>
  </template>
  <div class="dialog-mask"><aside id="dialog-file" class="dialog block-content">
-  <h2>信息池文件</h2><span class="dialog-close"></span>
+  <h2>信息池文件</h2><button class="dialog-close"></button>
   <p>仅支持带索引的信息池（<q>*.ijsom</q>）。JSON 数据需进行索引条目操作。</p>
-  <div class="block-inline"><input type="text" disabled /><input id="dialog-file-pool" type="file" /></div>
+  <div class="block-line">
+   <input type="text" disabled placeholder="--" />
+   <input id="dialog-file-pool" type="file" />
+  </div>
   <h2>用户文件</h2>
-  <div class="block-inline"><input type="text" disabled /><input id="dialog-file-user" type="file" /></div>
+  <div class="block-line">
+   <input type="text" disabled placeholder="--" />
+   <input id="dialog-file-user" type="file" accept="application/json" />
+  </div>
  </aside></div>
 </div>
 

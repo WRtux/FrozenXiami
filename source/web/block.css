@@ -1,4 +1,7 @@
-.block-content h1, .block-content h2, .block-content p, .block-content .block-inline {
+.block-content h1, .block-content h2, .block-content h3,
+.block-content p, .block-content blockquote, .block-content code, .block-content img,
+.block-content .block-block, .block-content .block-inline {
+	display: block;
 	margin: 15px 0;
 }
 .block-content> *:first-child {
@@ -9,42 +12,65 @@
 }
 
 .block-content h1 {
+	font-size: 1.6em;
 	font-weight: 600;
 }
 .block-content h2 {
+	font-size: 1.4em;
+	font-weight: 500;
+}
+.block-content h3 {
+	font-size: 1.2em;
 	font-weight: 500;
 }
 
-.block-content p {
+.block-content p, .block-content blockquote {
 	font-weight: 300;
 }
 
-.block-content q {
+.block-content q, .block-content code {
 	font-family: monospace;
 }
 .block-content q::before, .block-content q::after {
 	content: none;
 }
+.block-content p img {
+	display: inline;
+}
 
-.block-content .block-inline {
+.block-content .block-block {
+	position: relative;
+	z-index: 0;
+}
+.block-content .block-line {
 	display: flex;
 	align-items: center;
 }
 
-.block-inline input {
+.block-line input {
 	align-self: stretch;
 }
-.block-inline input[type=text] {
+.block-line input[type=text] {
 	flex-grow: 1;
 	border: 1px solid #cccccc;
 	border-radius: 0;
+	padding: 0 5px;
+	font-size: 80%;
 }
-.block-inline input[type=file] {
+.block-line input[type=text]::before {
+	display: inline-block;
+	height: 100%;
+	
+	content: "";
+	vertical-align: middle;
+}
+.block-line input[type=file] {
 	position: relative;
 	width: 40px;
+	height: 24px;
 	cursor: pointer;
 }
-.block-inline input[type=file]::before {
+.block-line input[type=file]::after {
 	position: absolute;
 	left: 0;
 	top: 0;
@@ -52,23 +78,12 @@
 	width: 100%;
 	height: 100%;
 	
-	content: "";
-	
-	background-color: #ff4411;
-	pointer-events: none;
-}
-.block-inline input[type=file]::after {
-	position: absolute;
-	left: 0;
-	top: 50%;
-	transform: translateY(-50%);
-	
-	width: 100%;
-	
 	content: "…";
-	font-weight: 700;
+	font-weight: 600;
+	line-height: 24px;
 	text-align: center;
 	
+	background-color: #ff4411;
 	color: #f7f7f7;
 	pointer-events: none;
 }

@@ -30,46 +30,61 @@
 	align-items: center;
 }
 
-#main .main-cover:not(img) {
+#main [class^="main-cover"] {
 	position: relative;
 	z-index: 0;
-	
-	margin: 5px 4% 15px 0;
+	margin: 5px 0 15px 0;
+	padding-bottom: 100%;
+}
+
+#main .main-cover-list {
+	margin-right: 4%;
 	padding-bottom: 96%;
 }
-#main .main-cover:not(img)::before, #main .main-cover:not(img)::after {
+#main .main-cover-list::before, #main .main-cover-list::after {
 	position: absolute;
 	border-radius: 2px;
 	content: "";
 	background-color: #88888833;
 }
-#main .main-cover:not(img)::before {
+#main .main-cover-list::before {
+	left: 0;
 	top: 8%;
 	z-index: -1;
 	
 	width: 103%;
 	height: 84%;
 }
-#main .main-cover:not(img)::after {
+#main .main-cover-list::after {
+	left: 0;
 	top: 14%;
 	z-index: -2;
 	
 	width: 105%;
 	height: 72%;
 }
-.main-cover> img {
+
+[class^="main-cover"]> img, [class^="main-cover"]> img::before {
 	position: absolute;
 	left: 0;
 	top: 0;
 	
-	margin: 0;
 	width: 100%;
 	height: 100%;
 	border-radius: 2px;
 	
+	background-color: #ffffff;
+}
+[class^="main-cover"]> img::before {
+	content: "";
+	background-image: url("image-broken.svg");
+	background-position: center;
+	background-size: 50%;
+	background-repeat: no-repeat;
 	background-color: #eeeeee;
 }
-.main-cover> span {
+
+[class^="main-cover"]> span {
 	position: absolute;
 	right: 5px;
 	top: 5px;
@@ -81,13 +96,6 @@
 	
 	background-color: #00000066;
 	color: #f7f7f7;
-}
-
-#main img.main-cover {
-	display: block;
-	margin: 5px 0 15px 0;
-	width: 100%;
-	border-radius: 2px;
 }
 
 #player {
@@ -191,6 +199,7 @@
 	font-size: 24px;
 	cursor: pointer;
 }
+
 .player-control> .player-control-center {
 	margin: 0 5px;
 	width: 50px;

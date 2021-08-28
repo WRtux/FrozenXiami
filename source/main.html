@@ -31,27 +31,39 @@
 
 <template id="main-template">
  <aside id="main-listbar" class="main-sidebar block-dynamic">
-  <div class="main-cover"><img /><span class="icon-play">0</span></div>
+  <div class="main-cover-list"><img /><span class="icon-play">0</span></div>
   <section class="block-content">
    <h3>…</h3>
    <p>…</p>
   </section>
  </aside>
  <aside id="main-songbar" class="main-sidebar block-dynamic">
-  <img class="main-cover" />
+  <div class="main-cover-song"><img /></div>
   <section class="block-content"><dl>
   </dl></section>
  </aside>
- <aside id="main-song" class="main-main block-dynamic">
-  <section class="block-content"><dl>
-  </dl></section>
+ <aside id="main-list" class="main-main block-dynamic">
+  <section class="block-content">
+   <h2>…</h2>
+   <div class="main-user"></div>
+   <dl>
+   </dl>
+  </section>
+  <!-- TODO -->
+ </aside>
+ <aside id="main-song" class="main-main block-content block-dynamic">
+  <h2>…</h2>
+  <div class="main-user"></div>
+  <dl>
+  </dl>
+  <h3>歌词</h3>
  </aside>
 </template>
 
-<article class="main-main block-dynamic block-content">
- <h2 class="icon-info">未加载文件</h2>
+<article class="main-main block-content block-dynamic">
+ <h2>未加载文件</h2>
  <p>加载 <span class="icon">⚫</span> 信息池文件以开始浏览。</p>
- <p>子版本：<q>20210828.0</q></p>
+ <p>子版本：<q>20210828.1</q></p>
 </article>
 
 </main>

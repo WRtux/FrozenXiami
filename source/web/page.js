@@ -13,6 +13,34 @@ var page = {
 	}
 };
 
+function switchScene(typ) {
+	let tmpl = page.templates.main;
+	let eles = [null, null];
+	switch (typ) {
+	case "home":
+		eles[0] = document.importNode(tmpl.getElementById("main-navbar"), true);
+		eles[1] = document.importNode(tmpl.getElementById("main-home"), true);
+		break;
+	case "album":
+		eles[0] = document.importNode(tmpl.getElementById("main-listbar"), true);
+		eles[1] = document.importNode(tmpl.getElementById("main-list"), true);
+		break;
+	case "song":
+		eles[0] = document.importNode(tmpl.getElementById("main-songbar"), true);
+		eles[1] = document.importNode(tmpl.getElementById("main-song"), true);
+		break;
+	default:
+		return null;
+	}
+	while (page.main.childElementCount > 0) {
+		page.main.removeChild(page.main.firstElementChild);
+	}
+	for (let ele of eles) {
+		page.main.appendChild(ele);
+	}
+	return eles;
+}
+
 function toast(inf, t) {
 	let ele = document.importNode(page.templates.toast.firstElementChild, true);
 	ele.addEventListener("click", (e) => { clearToast(ele); });

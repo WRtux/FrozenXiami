@@ -17,8 +17,8 @@
 
 <nav id="nav">
  <img class="nav-logo" src="web/logo.png" alt="Logo" />
- <a class="nav-item">风格</a>
- <a class="nav-item">歌单</a>
+ <a class="nav-item">发现</a>
+ <a class="nav-item">个人</a>
  <a class="nav-item">检索</a>
  <div class="nav-side">
   <button id="nav-search" class="nav-item icon">⚲</button>
@@ -30,40 +30,58 @@
 <main id="main">
 
 <template id="main-template">
+ <aside id="main-navbar" class="main-sidebar block-dynmaic">
+  <ul class="main-menu">
+   <li>推荐</li>
+   <li>精选集</li>
+   <li>艺人</li>
+   <li>专辑</li>
+   <li>曲风流派</li>
+   <li>更多</li>
+  </ul>
+ </aside>
  <aside id="main-listbar" class="main-sidebar block-dynamic">
-  <div class="main-cover-list"><img /><span class="icon-play">0</span></div>
+  <div class="main-cover-list"><img /><span class="icon-play"><!-- Dynamic --></span></div>
   <section class="block-content">
-   <h3>…</h3>
-   <p>…</p>
+   <h3><!-- Dynamic --></h3>
+   <p><!-- Dynamic --></p>
   </section>
  </aside>
  <aside id="main-songbar" class="main-sidebar block-dynamic">
   <div class="main-cover-song"><img /></div>
-  <section class="block-content"><dl>
-  </dl></section>
- </aside>
- <aside id="main-list" class="main-main block-dynamic">
   <section class="block-content">
-   <h2>…</h2>
-   <div class="main-user"></div>
-   <dl>
-   </dl>
+   <dl><!-- Dynamic --></dl>
+  </section>
+ </aside>
+ <article id="main-home" class="main-main block-dynmaic">
+  <h2>推荐歌单</h2>
+  <!-- TODO -->
+  <h2>热门艺人</h2>
+  <!-- TODO -->
+  <h2>曲风流派</h2>
+  <!-- TODO -->
+ </article>
+ <article id="main-list" class="main-main block-dynamic">
+  <section class="block-content">
+   <h2><!-- Dynamic --></h2>
+   <div class="main-user"><!-- Dynamic --></div>
+   <dl><!-- Dynamic --></dl>
   </section>
   <!-- TODO -->
- </aside>
- <aside id="main-song" class="main-main block-content block-dynamic">
-  <h2>…</h2>
-  <div class="main-user"></div>
-  <dl>
-  </dl>
+ </article>
+ <article id="main-song" class="main-main block-content block-dynamic">
+  <h2><!-- Dynamic --></h2>
+  <div class="main-user"><!-- Dynamic --></div>
+  <dl><!-- Dynamic --></dl>
   <h3>歌词</h3>
- </aside>
+  <!-- Dynamic -->
+ </article>
 </template>
 
 <article class="main-main block-content block-dynamic">
  <h2>未加载文件</h2>
  <p>加载 <span class="icon">⚫</span> 信息池文件以开始浏览。</p>
- <p>子版本：<q>20210828.1</q></p>
+ <p>子版本：<q>20210828.2</q></p>
 </article>
 
 </main>
@@ -89,15 +107,15 @@
 
 <div id="mask-toast">
  <template id="toast-template">
-  <div class="toast"><span>…</span></div>
+  <div class="toast"><span><!-- Dynamic --></span></div>
  </template>
 </div>
 
 <div id="mask-dialog">
  <template id="dialog-template">
   <div class="dialog-mask"><aside id="dialog" class="dialog block-content">
-   <h2>…</h2><button class="dialog-close"></button>
-   <p>…</p>
+   <h2><!-- Dynamic --></h2><button class="dialog-close"></button>
+   <p><!-- Dynamic --></p>
   </aside></div>
  </template>
  <div class="dialog-mask"><aside id="dialog-file" class="dialog block-content">

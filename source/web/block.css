@@ -1,5 +1,10 @@
+.block-content {
+	font-family: var(--font-sans);
+}
+
 .block-content h1, .block-content h2, .block-content h3,
-.block-content p, .block-content blockquote, .block-content code, .block-content img,
+.block-content p, .block-content blockquote, .block-content code,
+.block-content ul, block-content ol, .block-content dl, .block-content img,
 .block-content .block-block, .block-content .block-inline {
 	display: block;
 	margin: 15px 0;
@@ -28,12 +33,48 @@
 	font-weight: 300;
 }
 
-.block-content q, .block-content code {
-	font-family: monospace;
+.block-content blockquote, .block-content code {
+	border-left: 5px solid #cccccc;
+	padding: 5px;
+	box-shadow: 2px 2px 5px #00000033;
+}
+.block-content code {
+	border-left-color: #cc66ff;
+	font-family: var(--font-monospace);
+}
+
+.block-content ul, block-content ol {
+	padding-left: 1.5em;
+	font-weight: 400;
+}
+.block-content dl> div {
+	display: flex;
+	align-items: baseline;
+}
+.block-content dl> div> dt {
+	flex-basis: 4.0em;
+	margin-right: 0.5em;
+	
+	font-weight: 300;
+	white-space: nowrap;
+	
+	color: #888888;
+}
+.block-content dl> div> dd {
+	flex-grow: 1;
+	margin-left: 5px;
+	
+	font-weight: 400;
+	white-space: nowrap;
+}
+
+.block-content q {
+	font-family: var(--font-monospace);
 }
 .block-content q::before, .block-content q::after {
 	content: none;
 }
+
 .block-content p img {
 	display: inline;
 }
@@ -55,6 +96,7 @@
 	border: 1px solid #cccccc;
 	border-radius: 0;
 	padding: 0 5px;
+	
 	font-size: 80%;
 }
 .block-line input[type=text]::before {
@@ -66,8 +108,10 @@
 }
 .block-line input[type=file] {
 	position: relative;
+	
 	width: 40px;
 	height: 24px;
+	
 	cursor: pointer;
 }
 .block-line input[type=file]::after {
@@ -86,4 +130,10 @@
 	background-color: #ff4411;
 	color: #f7f7f7;
 	pointer-events: none;
+}
+
+@media screen and (max-width: 540px) {
+	.block-content dl {
+		font-size: 90%;
+	}
 }

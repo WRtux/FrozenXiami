@@ -6,8 +6,9 @@
  <meta charset="UTF-8" />
  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
  <title>FrozenXiami</title>
- <link rel="stylesheet" href="web/block.css" />
  <link rel="stylesheet" href="web/frame.css" />
+ <link rel="stylesheet" href="web/block.css" />
+ <link rel="stylesheet" href="web/main.css" />
  <link rel="stylesheet" href="web/mask.css" />
  <link rel="stylesheet" href="web/font/player.css" />
 </head>
@@ -28,9 +29,29 @@
 
 <main id="main">
 
-<article class="main-section block-dynamic block-content">
- <h2>未加载文件</h2>
- <p>加载信息池文件以开始浏览。</p>
+<template id="main-template">
+ <aside id="main-listbar" class="main-sidebar block-dynamic">
+  <div class="main-cover"><img /><span class="icon-play">0</span></div>
+  <section class="block-content">
+   <h3>…</h3>
+   <p>…</p>
+  </section>
+ </aside>
+ <aside id="main-songbar" class="main-sidebar block-dynamic">
+  <img class="main-cover" />
+  <section class="block-content"><dl>
+  </dl></section>
+ </aside>
+ <aside id="main-song" class="main-main block-dynamic">
+  <section class="block-content"><dl>
+  </dl></section>
+ </aside>
+</template>
+
+<article class="main-main block-dynamic block-content">
+ <h2 class="icon-info">未加载文件</h2>
+ <p>加载 <span class="icon">⚫</span> 信息池文件以开始浏览。</p>
+ <p>子版本：<q>20210828.0</q></p>
 </article>
 
 </main>
@@ -49,7 +70,7 @@
   <button id="player-prev" class="player-control-side icon">⏪</button>
   <button id="player-play" class="player-control-center icon">▶</button>
   <button id="player-next" class="player-control-side icon">⏩</button>
- </div><div class="player-side" style="justify-content: flex-end;">
+ </div><div class="player-side">
   <button class="player-item icon">⍾</button>
  </div>
 </aside>
@@ -62,7 +83,7 @@
 
 <div id="mask-dialog">
  <template id="dialog-template">
-  <div class="dialog-mask"><aside id="dialog-" class="dialog block-content">
+  <div class="dialog-mask"><aside id="dialog" class="dialog block-content">
    <h2>…</h2><button class="dialog-close"></button>
    <p>…</p>
   </aside></div>

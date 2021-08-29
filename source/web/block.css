@@ -5,7 +5,7 @@
 .block-content h1, .block-content h2, .block-content h3,
 .block-content p, .block-content blockquote, .block-content code,
 .block-content ul, block-content ol, .block-content dl, .block-content img,
-.block-content .block-block, .block-content .block-inline {
+.block-content .block-block, .block-content .block-line {
 	display: block;
 	margin: 15px 0;
 }
@@ -17,7 +17,7 @@
 }
 
 .block-content h1 {
-	font-size: 1.6em;
+	font-size: 1.5em;
 	font-weight: 600;
 }
 .block-content h2 {
@@ -90,10 +90,10 @@
 	align-items: center;
 }
 
-.block-line input {
+.block-content .block-line> input {
 	align-self: stretch;
 }
-.block-line input[type="text"] {
+.block-content .block-line> input[type="text"] {
 	flex-grow: 1;
 	border: 1px solid #cccccc;
 	border-radius: 0;
@@ -101,14 +101,14 @@
 	
 	font-size: 80%;
 }
-.block-line input[type="text"]::before {
+.block-content .block-line> input[type="text"]::before {
 	display: inline-block;
 	height: 100%;
 	
 	content: "";
 	vertical-align: middle;
 }
-.block-line input[type="file"] {
+.block-content .block-line> input[type="file"] {
 	position: relative;
 	
 	width: 40px;
@@ -116,7 +116,7 @@
 	
 	cursor: pointer;
 }
-.block-line input[type="file"]::after {
+.block-content .block-line> input[type="file"]::after {
 	position: absolute;
 	left: 0;
 	top: 0;

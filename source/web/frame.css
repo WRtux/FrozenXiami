@@ -22,7 +22,7 @@ body {
 	display: flex;
 	margin: 0 auto;
 	min-width: 90%;
-	width: 1000px;
+	width: 1200px;
 	max-width: 100%;
 	min-height: 100%;
 	
@@ -35,7 +35,7 @@ body {
 
 #nav, #main, #player {
 	display: flex;
-	padding: 0 40px;
+	padding: 0 6%;
 }
 
 #nav {
@@ -53,25 +53,35 @@ body {
 	flex-grow: 1;
 	align-items: flex-start;
 }
-#main> .main-main {
-	width: 200px;
-	flex-grow: 6;
-	padding: 10px;
-}
+
 #main> .main-sidebar {
+	margin-top: 20px;
 	width: 120px;
 	flex-grow: 1;
 	padding: 10px;
 	overflow: hidden;
+	background-color: #ffffff;
+}
+#main> .main-main {
+	margin-top: 20px;
+	width: 200px;
+	flex-grow: 6;
 }
 
-@media screen and (max-width: 720px) {
+@media screen and (max-width: 800px) {
 	#nav, #main, #player {
 		padding: 0 20px;
 	}
 }
 @media screen and (max-width: 540px) {
-	#main, #player {
+	#main {
+		display: block;
+	}
+	#main> .main-sidebar, #main> .main-main {
+		margin-top: 0;
+		width: 100%;
+	}
+	#player {
 		padding: 0;
 	}
 }

@@ -33,7 +33,7 @@
 	opacity: 0.0;
 }
 
-#mask-dialog> .dialog-mask {
+.dialog-mask {
 	position: fixed;
 	left: 0;
 	top: 0;
@@ -47,7 +47,7 @@
 	
 	background-color: #00000066;
 }
-#mask-dialog> .dialog-mask.block-active {
+.dialog-mask.block-active {
 	display: block;
 }
 .dialog-mask> .dialog {

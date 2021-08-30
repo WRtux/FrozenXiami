@@ -133,9 +133,3 @@
 	color: #f7f7f7;
 	pointer-events: none;
 }
-
-@media screen and (max-width: 540px) {
-	.block-content dl {
-		font-size: 90%;
-	}
-}

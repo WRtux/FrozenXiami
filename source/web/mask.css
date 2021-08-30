@@ -2,7 +2,7 @@
 	position: fixed;
 	right: 0;
 	top: 0;
-	z-index: 2;
+	z-index: 3;
 	
 	display: flex;
 	width: 480px;
@@ -37,7 +37,7 @@
 	position: fixed;
 	left: 0;
 	top: 0;
-	z-index: 1;
+	z-index: 2;
 	
 	display: none;
 	width: 100%;
@@ -47,9 +47,7 @@
 	
 	background-color: #00000066;
 }
-.dialog-mask.block-active {
-	display: block;
-}
+.dialog-mask.block-active { display: block; }
 .dialog-mask> .dialog {
 	position: fixed;
 	left: 50%;
@@ -79,6 +77,4 @@
 	cursor: pointer;
 	transition: background-color 0.3s;
 }
-.dialog> .dialog-close:hover {
-	background-color: #ff4411;
-}
+.dialog> .dialog-close:hover { background-color: #ff4411; }

@@ -130,6 +130,7 @@ function loadPool(f, onload, onerror, onprogress) {
 		} else {
 			loadPoolIndices(f.slice(8, 8 + len), function (dat) {
 				data.pool.file = f.slice(16 + len);
+				data.pool.cache = new Map();
 				onload(dat);
 			}, onerror, onprogress);
 			onprogress && onprogress("Ready");
@@ -160,11 +161,17 @@ function inflateEntry(en, onload, onerror) {
 		onerror && onerror();
 		return;
 	}
+	if (data.pool.cache.has(en.offset)) {
+		onload(JSON.parse(data.pool.cache.get(en.offset)));
+		return;
+	}
 	let fr = new FileReader();
 	fr.readAsArrayBuffer(data.pool.file.slice(en.offset, en.offset + en.length));
 	fr.addEventListener("load", function (e) {
 		try {
 			let str = new TextDecoder().decode(e.target.result);
+			data.pool.cache.set(en.offset, str);
+			trimPoolCache();
 			onload(JSON.parse(str));
 		} catch (err) {
 			console.error(err);
@@ -191,22 +198,46 @@ function inflateEntries(ens, onload, oerror) {
 	let buf = new Array();
 	let cnt = 0;
 	for (let en of ens) {
+		if (data.pool.cache.has(en.offset)) {
+			buf.push(JSON.parse(data.pool.cache.get(en.offset)));
+			if (++cnt == ens.length) {
+				trimPoolCache();
+				onload(buf);
+				return;
+			}
+			continue;
+		}
 		let fr = new FileReader();
 		fr.readAsArrayBuffer(data.pool.file.slice(en.offset, en.offset + en.length));
 		fr.addEventListener("load", function (e) {
 			try {
 				let str = new TextDecoder().decode(e.target.result);
 				buf.push(JSON.parse(str));
+				data.pool.cache.set(en.offset, str);
 			} catch (err) {
 				console.error(err);
 				toast(en.name + " 存在数据错误。");
 			}
-			++cnt == ens.length && onload(buf);
+			if (++cnt == ens.length) {
+				trimPoolCache();
+				onload(buf);
+			}
 		});
 		fr.addEventListener("error", function (e) {
 			toast("读取 " + en.name + " 数据失败。");
 			++cnt == ens.length && onload(buf);
 		});
+	}
+}
+
+function trimPoolCache(lim) {
+	lim = lim || 10000;
+	if (data.pool.cache.size <= lim)
+		return;
+	for (let off of data.pool.cache.keys()) {
+		data.pool.cache.delete(off);
+		if (data.pool.cache.size <= lim)
+			break;
 	}
 }
 
@@ -233,7 +264,7 @@ function searchEntryIndices(typ, ns) {
 	ns = ns.map((n) => n.toLowerCase());
 	return getIndices(typ).filter(function (en) {
 		let strs = Array.from(en.keywords);
-		strs.push(en.name);
+		strs.unshift(en.name);
 		strs = strs.map((str) => str.toLowerCase());
 		return ns.every((n) => strs.some((str) => str.includes(n)));
 	});

@@ -180,11 +180,38 @@
 }
 
 @media screen and (max-width: 540px) {
-	#main [class^="main-cover"] {
+	#main> *> [class^="main-cover"] {
 		margin: 15px auto;
 		width: 200px;
 		padding-bottom: 200px;
 	}
+}
+
+#main .main-infolist {
+	display: block;
+	margin: 15px 0;
+}
+#main .main-infolist> div {
+	display: flex;
+	margin-bottom: 5px;
+	align-items: baseline;
+}
+#main .main-infolist> div:last-child { margin-bottom: 0; }
+#main .main-infolist> div> dt {
+	flex-basis: 4.0em;
+	margin-right: 0.5em;
+	
+	font-weight: 300;
+	white-space: nowrap;
+	
+	color: #888888;
+}
+#main .main-infolist> div> dd {
+	flex-grow: 1;
+	margin-left: 5px;
+	
+	font-weight: 400;
+	white-space: nowrap;
 }
 
 #main .main-banner {
@@ -215,6 +242,48 @@
 #main h2.main-title {
 	font-size: 1.4em;
 	font-weight: 500;
+}
+
+#main .main-user {
+	display: flex;
+	margin: 15px 0;
+	align-items: center;
+}
+#main .main-user> img {
+	margin-right: 5px;
+	width: 35px;
+	height: 35px;
+	border-radius: 50%;
+	
+	overflow: hidden;
+	
+	background-color: #eeeeee;
+	object-fit: cover;
+}
+#main .main-user> span {
+	padding: 5px;
+	font-size: 0.9em;
+}
+
+#main .main-flow {
+	display: grid;
+	margin: 15px 0;
+	
+	grid-template-columns: repeat(5, 1fr);
+	grid-gap: 10px;
+}
+#main .main-flow> figure {
+	padding: 10px;
+	cursor: pointer;
+}
+#main .main-flow> figure:hover { background-color: #eeeeee; }
+#main .main-flow> figure> [class^="main-cover"] {
+	margin-top: 0;
+}
+#main .main-flow> figure> figcaption {
+	display: block;
+	margin-bottom: 10px;
+	font-weight: 600;
 }
 
 #player {
@@ -292,6 +361,7 @@
 	width: 80px;
 	height: 80px;
 	
+	background-color: #eeeeee;
 	object-fit: contain;
 }
 #player .player-cover::before {

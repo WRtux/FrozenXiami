@@ -22,7 +22,7 @@
  <a class="nav-item">检索</a>
  <div class="nav-side">
   <button id="nav-search" class="nav-item icon">⚲</button>
-  <button id="nav-more" class="nav-item icon">⚫</button>
+  <button id="nav-file" class="nav-item icon">⚫</button>
   <span id="nav-avatar" class="nav-avatar">用户</span>
  </div>
 </nav>
@@ -124,6 +124,15 @@
    <p><!-- Dynamic --></p>
   </aside></div>
  </template>
+ <div class="dialog-mask"><aside id="dialog-search" class="dialog block-content">
+  <h2>快速搜索</h2><button class="dialog-close"></button>
+  <p>根据关键词按默认排序进行即时搜索（最多显示 100 条结果）。<br />要进行自定义的搜索，请使用检索页。</p>
+  <div class="block-line">
+   <input type="text" placeholder="关键词" />
+   <button id="dialog-search-search" class="icon">⚲</button>
+  </div>
+  <!-- TODO -->
+ </aside></div>
  <div class="dialog-mask"><aside id="dialog-file" class="dialog block-content">
   <h2>信息池文件</h2><button class="dialog-close"></button>
   <p>仅支持带索引的信息池（<q>*.ijsom</q>）。JSON 数据需进行索引条目操作。</p>

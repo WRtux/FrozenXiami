@@ -1,6 +1,7 @@
 "use strict";
 
 var page = {
+	scene: "load",
 	main: document.getElementById("main"),
 	masks: {
 		toast: document.getElementById("mask-toast"),
@@ -13,13 +14,23 @@ var page = {
 	}
 };
 
-function switchScene(typ) {
+function switchScene(n) {
 	let tmpl = page.templates.main;
 	let eles = [null, null];
-	switch (typ) {
+	switch (n) {
 	case "home":
 		eles[0] = document.importNode(tmpl.getElementById("main-navbar"), true);
 		eles[1] = document.importNode(tmpl.getElementById("main-home"), true);
+		break;
+	case "home-playlists":
+	case "home-artists":
+	case "home-albums":
+	case "home-styles":
+	case "user":
+	case "retrieval":
+		toast("页面尚未实现，请等待后续版本。");
+		return null;
+	case "artist":
 		break;
 	case "album":
 		eles[0] = document.importNode(tmpl.getElementById("main-listbar"), true);
@@ -29,6 +40,11 @@ function switchScene(typ) {
 		eles[0] = document.importNode(tmpl.getElementById("main-songbar"), true);
 		eles[1] = document.importNode(tmpl.getElementById("main-song"), true);
 		break;
+	case "playlist":
+		break;
+	case "about":
+		alertDialog("关于", "FrozenXiami by Wilderness Ranger.");
+		return null;
 	default:
 		return null;
 	}
@@ -38,7 +54,31 @@ function switchScene(typ) {
 	for (let ele of eles) {
 		page.main.appendChild(ele);
 	}
+	page.scene = n;
 	return eles;
+}
+
+function sceneDisplay(o) {
+	switch (page.scene) {
+	case "artist":
+		return;
+	case "album":
+		return;
+	case "song":
+		page.main.querySelector("#main> .main-main> .main-title").textContent = o.name;
+		let cont = page.main.querySelector("#main> .main-main> .main-user");
+		let ele = document.createElement("img");
+		ele.src = o.artist.logoURL;
+		cont.appendChild(ele);
+		ele = document.createElement("span");
+		ele.textContent = o.artist.name;
+		cont.appendChild(ele);
+		return;
+	case "playlist":
+		return;
+	default:
+		return;
+	}
 }
 
 function toast(inf, t) {
@@ -99,7 +139,8 @@ function closeDialog(dlg) {
 	while (eles.length > 0) {
 		eles[0].remove();
 	}
-	document.getElementById("nav-more").addEventListener("click", (e) => { openDialog("file"); });
+	document.getElementById("nav-search").addEventListener("click", (e) => { openDialog("search"); });
+	document.getElementById("nav-file").addEventListener("click", (e) => { openDialog("file"); });
 	document.getElementById("dialog-file-pool").addEventListener("change", function (e) {
 		if (this.files.length != 1)
 			return;
@@ -107,8 +148,8 @@ function closeDialog(dlg) {
 		let dlg = alertDialog("加载中", "请稍等……", true);
 		loadPool(this.files[0], function (dat) {
 			closeDialog(dlg);
-			let cnts = [dat.artists.length, dat.albums.length, dat.songs.length];
-			toast(`成功加载了 ${cnts[0]} 个艺人，${cnts[1]} 张专辑，${cnts[2]} 首音乐索引。`, 3000);
+			let cnt = dat.artists.length + dat.albums.length + dat.songs.length;
+			toast(`成功加载了 ${cnt} 条索引，包含 ${dat.songs.length} 首音乐索引。`, 3000);
 		}, function () {
 			closeDialog(dlg);
 			alertDialog("错误", "加载失败。");

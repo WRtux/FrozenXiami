@@ -185,11 +185,36 @@ function inflateEntry(en, onload, onerror) {
 	});
 }
 
-function inflateEntries(ens, onload, oerror) {
-	let ed = 0;
-	for (let en of ens) {
-		ed = Math.max(en.offset + en.length, ed);
+function inflateEntryPromise(en) {
+	if (data.pool.file.size < en.offset + en.length) {
+		toast("文件大小错误。");
+		return null;
 	}
+	if (data.pool.cache.has(en.offset))
+		return Promise.resolve(JSON.parse(data.pool.cache.get(en.offset)));
+	return new Promise(function (resolve, reject) {
+		let fr = new FileReader();
+		fr.readAsArrayBuffer(data.pool.file.slice(en.offset, en.offset + en.length));
+		fr.addEventListener("load", function (e) {
+			try {
+				let str = new TextDecoder().decode(e.target.result);
+				data.pool.cache.set(en.offset, str);
+				trimPoolCache();
+				resolve(JSON.parse(str));
+			} catch (err) {
+				toast(en.name + " 存在数据错误。");
+				reject();
+			}
+		});
+		fr.addEventListener("error", function (e) {
+			toast("读取 " + en.name + " 数据失败。");
+			reject();
+		});
+	});
+}
+
+function inflateEntries(ens, onload, oerror) {
+	let ed = ens.reduce((max, en) => Math.max(en.offset + en.length, max), 0);
 	if (data.pool.file.size < ed) {
 		toast("文件大小错误。");
 		onerror && onerror();
@@ -258,6 +283,11 @@ function queryEntryIndex(typ, id, sid) {
 
 function queryEntry(typ, id, sid, onload, onerror) {
 	return inflateEntry(queryEntryIndex(typ, id, sid), onload, onerror);
+}
+
+function queryEntryPromise(typ, id, sid) {
+	let en = queryEntryIndex(typ, id, sid);
+	return en && inflateEntryPromise(en);
 }
 
 function searchEntryIndices(typ, ns) {

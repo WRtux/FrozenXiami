@@ -188,31 +188,32 @@
 }
 
 #main .main-infolist {
-	display: block;
+	display: grid;
 	margin: 15px 0;
-}
-#main .main-infolist> div {
-	display: flex;
-	margin-bottom: 5px;
+	
+	grid-template-rows: repeat(1000, auto);
+	grid-template-columns: minmax(4.0em, auto) 1fr;
 	align-items: baseline;
 }
-#main .main-infolist> div:last-child { margin-bottom: 0; }
-#main .main-infolist> div> dt {
-	flex-basis: 4.0em;
-	margin-right: 0.5em;
+#main .main-infolist> dt {
+	grid-column: 1;
+	
+	margin-right: 1.0em;
 	
 	font-weight: 300;
 	white-space: nowrap;
 	
 	color: #888888;
 }
-#main .main-infolist> div> dd {
-	flex-grow: 1;
-	margin-left: 5px;
+#main .main-infolist> dd {
+	grid-column: 2;
+	
+	margin-bottom: 5px;
 	
 	font-weight: 400;
 	white-space: nowrap;
 }
+#main .main-infolist> dd:last-child { margin-bottom: 0; }
 
 #main .main-banner {
 	position: relative;

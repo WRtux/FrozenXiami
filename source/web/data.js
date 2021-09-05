@@ -184,7 +184,6 @@ function inflateEntry(en, onload, onerror) {
 		onerror && onerror();
 	});
 }
-
 function inflateEntryPromise(en) {
 	if (data.pool.file.size < en.offset + en.length) {
 		toast("文件大小错误。");
@@ -254,6 +253,41 @@ function inflateEntries(ens, onload, oerror) {
 		});
 	}
 }
+function inflateEntriesPromise(ens) {
+	let ed = ens.reduce((max, en) => Math.max(en.offset + en.length, max), 0);
+	if (data.pool.file.size < ed) {
+		toast("文件大小错误。");
+		return null;
+	}
+	let tsks = ens.map((en) => new Promise(function (resolve, reject) {
+		if (data.pool.cache.has(en.offset))
+			resolve(JSON.parse(data.pool.cache.get(en.offset)));
+		let fr = new FileReader();
+		fr.readAsArrayBuffer(data.pool.file.slice(en.offset, en.offset + en.length));
+		fr.addEventListener("load", function (e) {
+			try {
+				let str = new TextDecoder().decode(e.target.result);
+				data.pool.cache.set(en.offset, str);
+				resolve(JSON.parse(str));
+			} catch (err) {
+				toast(en.name + " 存在数据错误。");
+				reject();
+			}
+		});
+		fr.addEventListener("error", function (e) {
+			toast("读取 " + en.name + " 数据失败。");
+			reject();
+		});
+	}));
+	return Promise.allSettled(tsks).then(function (ress) {
+		trimPoolCache();
+		let ens = new Array();
+		for (let res of ress) {
+			res.status == "fulfilled" && res.value && ens.push(res.value);
+		}
+		return ens;
+	});
+}
 
 function trimPoolCache(lim) {
 	lim = lim || 10000;
@@ -284,7 +318,6 @@ function queryEntryIndex(typ, id, sid) {
 function queryEntry(typ, id, sid, onload, onerror) {
 	return inflateEntry(queryEntryIndex(typ, id, sid), onload, onerror);
 }
-
 function queryEntryPromise(typ, id, sid) {
 	let en = queryEntryIndex(typ, id, sid);
 	return en && inflateEntryPromise(en);
@@ -306,30 +339,32 @@ function searchEntries(typ, ns, onload, onerror, off, lim) {
 		ens = ens.slice(off, off + lim);
 	inflateEntries(ens, onload, onerror);
 }
+function searchEntriesPromise(typ, ns, off, lim) {
+	return new Promise(function (resolve, reject) {
+		let ens = searchEntryIndices(typ, ns);
+		if (off && lim)
+			ens = ens.slice(off, off + lim);
+		inflateEntriesPromise(ens).then(resolve, reject);
+	});
+}
 
 function sortListEntries(ens, ns) {
 	ns = ns.map((n) => n.toLowerCase());
-	return ens.sort(function (a, b) {
-		let nsa = Array.from(ns), nsb = Array.from(ns);
-		let filter = (str, ns) => ns.filter((n) => str.includes(n));
-		let diff = (o, m) => o.filter((n) => !m.includes(n));
-		let resa = filter(a.name.toLowerCase(), nsa), resb = filter(b.name.toLowerCase(), nsb);
-		let scra = resa.length * 5, scrb = resb.length * 5;
-		nsa = diff(nsa, resa), nsb = diff(nsb, resb);
-		if (a.translation) {
-			resa = filter(a.translation.toLowerCase(), nsa);
-			scra += resa.length * 4;
-			nsa = diff(nsa, resa);
-		}
-		if (b.translation) {
-			resb = filter(b.translation.toLowerCase(), nsb);
-			scrb += resb.length * 4;
-			nsb = diff(nsb, resb);
-		}
-		if (a.subName)
-			scra += filter(a.subName.toLowerCase(), nsa).length * 2;
-		if (b.subName)
-			scrb += filter(b.subName.toLowerCase(), nsb).length * 2;
-		return scrb - scra;
+	let map = ens.map(function (en) {
+		let nns = Array.from(ns);
+		let filter = function (str) {
+			let res = nns.filter((n) => str.includes(n));
+			nns = nns.filter((n) => !res.includes(n));
+			return res;
+		};
+		let scr = filter(en.name.toLowerCase()).length * 6 / ns.length;
+		if (en.translation)
+			scr += filter(en.translation.toLowerCase()).length * 5 / ns.length;
+		if (en.subName)
+			scr += filter(en.subName.toLowerCase()).length * 3 / ns.length;
+		if (en.playCount && en.playCount >= 1000)
+			scr += Math.log10(en.playCount) - 3;
+		return {entry: en, score: scr};
 	});
+	return map.sort((a, b) => b.score - a.score).map((en) => en.entry);
 }

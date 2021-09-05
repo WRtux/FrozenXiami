@@ -1,7 +1,6 @@
 "use strict";
 
 var page = {
-	scene: "load",
 	main: document.getElementById("main"),
 	masks: {
 		toast: document.getElementById("mask-toast"),
@@ -13,73 +12,6 @@ var page = {
 		dialog: document.getElementById("dialog-template").content
 	}
 };
-
-function switchScene(n) {
-	let tmpl = page.templates.main;
-	let eles = [null, null];
-	switch (n) {
-	case "home":
-		eles[0] = document.importNode(tmpl.getElementById("main-navbar"), true);
-		eles[1] = document.importNode(tmpl.getElementById("main-home"), true);
-		break;
-	case "home-playlists":
-	case "home-artists":
-	case "home-albums":
-	case "home-styles":
-	case "user":
-	case "retrieval":
-		toast("页面尚未实现，请等待后续版本。");
-		return null;
-	case "artist":
-		break;
-	case "album":
-		eles[0] = document.importNode(tmpl.getElementById("main-listbar"), true);
-		eles[1] = document.importNode(tmpl.getElementById("main-list"), true);
-		break;
-	case "song":
-		eles[0] = document.importNode(tmpl.getElementById("main-songbar"), true);
-		eles[1] = document.importNode(tmpl.getElementById("main-song"), true);
-		break;
-	case "playlist":
-		break;
-	case "about":
-		alertDialog("关于", "FrozenXiami by Wilderness Ranger.");
-		return null;
-	default:
-		return null;
-	}
-	while (page.main.childElementCount > 0) {
-		page.main.removeChild(page.main.firstElementChild);
-	}
-	for (let ele of eles) {
-		page.main.appendChild(ele);
-	}
-	page.scene = n;
-	return eles;
-}
-
-function sceneDisplay(o) {
-	switch (page.scene) {
-	case "artist":
-		return;
-	case "album":
-		return;
-	case "song":
-		page.main.querySelector("#main> .main-main> .main-title").textContent = o.name;
-		let cont = page.main.querySelector("#main> .main-main> .main-user");
-		let ele = document.createElement("img");
-		ele.src = o.artist.logoURL;
-		cont.appendChild(ele);
-		ele = document.createElement("span");
-		ele.textContent = o.artist.name;
-		cont.appendChild(ele);
-		return;
-	case "playlist":
-		return;
-	default:
-		return;
-	}
-}
 
 function toast(inf, t) {
 	let ele = document.importNode(page.templates.toast.firstElementChild, true);

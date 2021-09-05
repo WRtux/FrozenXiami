@@ -5,12 +5,10 @@ var scene = {
 };
 
 scene.switch = function (n) {
-	let eles = this.list[n] && this.list[n].createMain(page.templates.main);
+	let eles = this.list[n] && this.list[n].createMain.call(this.helper, page.templates.main);
 	if (!eles)
 		return null;
-	while (page.main.childElementCount > 0) {
-		page.main.removeChild(page.main.firstElementChild);
-	}
+	this.helper.removeChildren(page.main);
 	for (let ele of eles) {
 		page.main.appendChild(ele);
 	}
@@ -33,12 +31,6 @@ scene.helper.buildElement = function (typ, attrs, txt) {
 	return ele;
 };
 
-scene.helper.removeChildren = function (ele) {
-	while (ele.hasChildNodes()) {
-		ele.removeChild(ele.firstChild);
-	}
-};
-
 scene.helper.buildInfoRow = function (tt, infs) {
 	let dfrg = document.createDocumentFragment();
 	dfrg.appendChild(this.buildElement("dt", null, tt));
@@ -46,14 +38,26 @@ scene.helper.buildInfoRow = function (tt, infs) {
 		dfrg.appendChild(this.buildElement("dd", null, inf));
 	}
 	return dfrg;
-}
+};
+
+scene.helper.replaceChildrenClass = function (cont, src, dest) {
+	for (let ele of cont.getElementsByClassName(src)) {
+		ele.classList.replace(src, dest);
+	}
+};
+
+scene.helper.removeChildren = function (cont) {
+	while (cont.hasChildNodes()) {
+		cont.removeChild(cont.firstChild);
+	}
+};
 
 scene.list["home"] = {
 	createMain: function (tmpl) {
 		let eles = new Array();
 		eles.push(document.importNode(tmpl.getElementById("main-navbar"), true));
 		eles.push(document.importNode(tmpl.getElementById("main-home"), true));
-		let cont = eles[0].querySelector(".main-sidebar> .main-menu");
+		let cont = eles[0].getElementsByClassName("main-menu")[0];
 		cont.children[0].addEventListener("click", (e) => scene.switch("home"));
 		cont.children[1].addEventListener("click", (e) => scene.switch("home-playlists"));
 		cont.children[2].addEventListener("click", (e) => scene.switch("home-artists"));
@@ -65,13 +69,50 @@ scene.list["home"] = {
 	display: null
 };
 
+scene.list["home-playlists"] = scene.list["home-artists"] = scene.list["home-albums"] = scene.list["home-styles"] = {
+	createMain: function (tmpl) {
+		toast("页面尚未实现，请等待后续版本。");
+		return null;
+	}
+};
+
+scene.list["user"] = {
+	createMain: function (tmpl) {
+		toast("页面尚未实现，请等待后续版本。");
+		return null;
+	}
+};
+
+scene.list["retrieval"] = {
+	createMain: function (tmpl) {
+		toast("页面尚未实现，请等待后续版本。");
+		return null;
+	}
+};
+
+scene.list["artist"] = {
+	createMain: function (tmpl) {
+		let eles = new Array();
+		eles.push(document.importNode(tmpl.getElementById("main-listbar"), true));
+		eles.push(document.importNode(tmpl.getElementById("main-list"), true));
+		this.replaceChildrenClass(eles[0], "main-cover-list", "main-cover-artist");
+		eles[1].getElementsByClassName("main-user")[0].remove();
+		return eles;
+	},
+	display: async function (trg, o) {
+		let cont = trg.querySelector(".main-sidebar> .main-cover-artist");
+		this.removeChildren(cont);
+		cont.appendChild(this.buildElement("img", {src: o.logoURL}));
+		trg.querySelector(".main-main> .main-title").textContent = o.name;
+	}
+};
+
 scene.list["album"] = {
 	createMain: function (tmpl) {
 		let eles = new Array();
-		let cont = document.importNode(tmpl.getElementById("main-listbar"), true);
-		cont.getElementsByClassName("main-cover-list")[0].classList.replace("main-cover-list", "main-cover-album");
-		eles.push(cont);
+		eles.push(document.importNode(tmpl.getElementById("main-listbar"), true));
 		eles.push(document.importNode(tmpl.getElementById("main-list"), true));
+		this.replaceChildrenClass(eles[0], "main-cover-list", "main-cover-album");
 		return eles;
 	},
 	display: async function (trg, o) {
@@ -102,6 +143,10 @@ scene.list["song"] = {
 		let cont = trg.querySelector(".main-sidebar> .main-cover-song");
 		this.removeChildren(cont);
 		cont.appendChild(this.buildElement("img", {src: en.logoURL}));
+		cont.appendChild(this.buildElement("span", {class: "icon-play"}, o.playCount));
+		cont = trg.querySelector(".main-sidebar> .main-infolist");
+		this.removeChildren(cont);
+		cont.appendChild(this.buildInfoRow("专辑", [o.album.name]));
 		trg.querySelector(".main-main> .main-title").textContent = o.name;
 		en = await queryEntryPromise("artist", o.artist.id, o.artist.sid);
 		cont = trg.querySelector(".main-main> .main-user");
@@ -110,7 +155,20 @@ scene.list["song"] = {
 		cont.appendChild(this.buildElement("span", null, en.name));
 		cont = trg.querySelector(".main-main> .main-infolist");
 		this.removeChildren(cont);
-		cont.appendChild(this.buildInfoRow("专辑名称", [o.album.name]));
-		cont.appendChild(this.buildInfoRow("译名", [o.translation]));
+		o.translation && cont.appendChild(this.buildInfoRow("译名", [o.translation]));
+	}
+};
+
+scene.list["playlist"] = {
+	createMain: function (tmpl) {
+		toast("页面尚未实现，请等待后续版本。");
+		return null;
+	}
+};
+
+scene.list["about"] = {
+	createMain: function (tmpl) {
+		toast("页面尚未实现，请等待后续版本。");
+		return null;
 	}
 };

@@ -60,13 +60,17 @@ body {
 
 #main> .main-sidebar {
 	position: relative;
-	z-index: 1;
 	
-	margin: 20px 20px 0 0;
+	margin: 20px 40px 0 0;
 	width: 120px;
 	flex-grow: 1;
+	
 	overflow: hidden;
+	
 	background-color: #ffffff;
+}
+@media screen and (max-width: 800px) {
+	#main> .main-sidebar { margin-right: 20px; }
 }
 #main> .main-main {
 	margin-top: 20px;

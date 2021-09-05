@@ -5,8 +5,7 @@
 	z-index: 3;
 	
 	display: flex;
-	width: 480px;
-	max-width: 80%;
+	width: 80%;
 	height: 40%;
 	
 	flex-direction: column;
@@ -18,10 +17,13 @@
 }
 
 #mask-toast> .toast {
-	margin: 0 10px 10px 10px;
+	margin-bottom: 10px;
 	min-width: 120px;
+	max-width: 480px;
 	border-left: 5px solid #ff8866;
 	padding: 5px;
+	
+	overflow-wrap: anywhere;
 	
 	background-color: #ffffff;
 	box-shadow: 2px 2px 5px #00000033;

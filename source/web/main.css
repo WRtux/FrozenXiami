@@ -7,6 +7,7 @@
 #nav> .nav-logo {
 	margin-right: 20px;
 	height: 40px;
+	flex-shrink: 0;
 }
 @media screen and (max-width: 540px) {
 	#nav> .nav-logo { margin-right: 10px; }
@@ -25,6 +26,7 @@
 	margin: 0 5px;
 	width: 35px;
 	height: 35px;
+	flex-shrink: 0;
 	border-radius: 50%;
 	
 	font-size: 12px;
@@ -114,7 +116,7 @@
 	top: 0;
 	z-index: -1;
 	
-	width: 96%;
+	width: 95%;
 	height: 100%;
 	border-radius: 50%;
 	
@@ -129,19 +131,19 @@
 	background-color: #88888833;
 }
 #main .main-cover-list::before {
-	left: 0;
+	left: 19%;
 	top: 8%;
 	z-index: -1;
 	
-	width: 103%;
+	width: 84%;
 	height: 84%;
 }
 #main .main-cover-list::after {
-	left: 0;
+	left: 33%;
 	top: 14%;
 	z-index: -2;
 	
-	width: 105%;
+	width: 72%;
 	height: 72%;
 }
 
@@ -170,10 +172,12 @@
 	right: 5px;
 	top: 5px;
 	
+	height: 16px;
 	border-radius: 2px;
 	padding: 0 5px;
 	
-	font-size: 80%;
+	font-size: 12px;
+	line-height: 16px;
 	
 	background-color: #00000066;
 	color: #f7f7f7;
@@ -194,6 +198,8 @@
 	grid-template-rows: repeat(1000, auto);
 	grid-template-columns: minmax(4.0em, auto) 1fr;
 	align-items: baseline;
+	
+	font-size: 0.9em;
 }
 #main .main-infolist> dt {
 	grid-column: 1;
@@ -227,6 +233,7 @@
 #main .main-banner> img:first-child, #main .main-banner> img:last-child {
 	position: absolute;
 	top: 0;
+	z-index: -1;
 	height: 100%;
 }
 #main .main-banner> img:first-child { right: 100%; }
@@ -248,12 +255,14 @@
 #main .main-user {
 	display: flex;
 	margin: 15px 0;
+	overflow-x: auto;
 	align-items: center;
 }
 #main .main-user> img {
 	margin-right: 5px;
 	width: 35px;
 	height: 35px;
+	flex-shrink: 0;
 	border-radius: 50%;
 	
 	overflow: hidden;
@@ -262,8 +271,8 @@
 	object-fit: cover;
 }
 #main .main-user> span {
+	margin-right: 20px;
 	padding: 5px;
-	font-size: 0.9em;
 }
 
 #main .main-flow {
@@ -312,9 +321,11 @@
 	
 	display: block;
 	width: 80px;
+	height: 16px;
 	border-radius: 10px;
 	
 	font-size: 12px;
+	line-height: 16px;
 	text-align: center;
 	white-space: nowrap;
 	
@@ -357,10 +368,10 @@
 #player .player-cover {
 	position: relative;
 	
-	flex-shrink: 0;
 	margin-right: 5px;
 	width: 80px;
 	height: 80px;
+	flex-shrink: 0;
 	
 	background-color: #eeeeee;
 	object-fit: contain;
@@ -390,6 +401,7 @@
 	display: block;
 	margin-bottom: 5px;
 	width: max-content;
+	white-space: nowrap;
 }
 #player .player-info> span:nth-child(2) {
 	font-size: 0.8em;
@@ -397,9 +409,12 @@
 }
 
 #player .player-item, #player .player-control-side {
-	padding: 5px;
+	padding: 5px 10px;
 	font-size: 24px;
 	cursor: pointer;
+}
+@media screen and (max-width: 540px) {
+	#player .player-item, #player .player-control-side { padding: 5px; }
 }
 
 #player .player-control-center {

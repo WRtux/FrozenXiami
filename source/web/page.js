@@ -82,6 +82,7 @@ function closeDialog(dlg) {
 			closeDialog(dlg);
 			let cnt = dat.artists.length + dat.albums.length + dat.songs.length;
 			toast(`成功加载了 ${cnt} 条索引，包含 ${dat.songs.length} 首音乐索引。`, 3000);
+			scene.switch("home");
 		}, function () {
 			closeDialog(dlg);
 			alertDialog("错误", "加载失败。");

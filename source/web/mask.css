@@ -28,11 +28,19 @@
 	background-color: #ffffff;
 	box-shadow: 2px 2px 5px #00000033;
 	pointer-events: auto;
-	transition: transform 0.3s, opacity 0.3s;
+	animation: toast-in 0.3s 1;
 }
 #mask-toast> .toast.toast-clear {
-	transform: translateX(100%);
-	opacity: 0.0;
+	animation: toast-out 0.5s 1;
+}
+@keyframes toast-in {
+	0% { transform: translateX(100%); opacity: 0.4; }
+	100% { transform: translateX(0); opacity: 1.0; }
+}
+@keyframes toast-out {
+	0% { transform: translateX(0); opacity: 1.0; }
+	60% { transform: translateX(100%); }
+	100% { opacity: 0.0; }
 }
 
 .dialog-mask {

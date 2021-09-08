@@ -275,25 +275,59 @@
 	padding: 5px;
 }
 
-#main .main-flow {
+#main [class^="main-flow"] {
 	display: grid;
 	margin: 15px 0;
 	
-	grid-template-columns: repeat(5, 1fr);
-	grid-gap: 10px;
+	justify-items: start;
+	grid-gap: 15px;
 }
-#main .main-flow> figure {
-	padding: 10px;
+#main .main-flow-style {
+	justify-items: center;
+}
+#main .main-flow { grid-template-columns: repeat(auto-fill, minmax(120px, auto)); }
+#main .main-flow-list { grid-template-columns: repeat(auto-fill, minmax(200px, auto)); }
+#main .main-flow-style { grid-template-columns: repeat(auto-fill, minmax(180px, auto)); }
+
+#main [class^="main-flow"]> figure {
+	width: 100%;
 	cursor: pointer;
 }
+#main .main-flow> figure { max-width: 170px; }
+#main .main-flow-style> figure { max-width: 240px; }
 #main .main-flow> figure:hover { background-color: #eeeeee; }
-#main .main-flow> figure> [class^="main-cover"] {
+
+#main [class^="main-flow"] [class^="main-cover"] {
 	margin-top: 0;
 }
-#main .main-flow> figure> figcaption {
+#main .main-flow-list .main-cover {
+	margin-bottom: 0;
+	padding-bottom: 60%;
+}
+#main .main-flow-list div {
+	padding: 10px;
+	background-color: #333333;
+	color: #f7f7f7;
+}
+
+#main [class^="main-flow"] figcaption {
 	display: block;
 	margin-bottom: 10px;
 	font-weight: 600;
+}
+#main [class^="main-flow"] span {
+	font-size: 90%;
+	color: #888888;
+}
+#main .main-flow-list span { color: #f7f7f7; }
+
+#main [class^="main-flow"] .main-user {
+	margin-bottom: 0;
+	overflow-x: hidden;
+}
+#main [class^="main-flow"] .main-user> img {
+	width: 30px;
+	height: 30px;
 }
 
 #player {
@@ -445,7 +479,7 @@
 		font-size: 90%;
 	}
 	#player .player-info> span {
-		animation: scroll 4s linear infinite;
+		animation: player-scroll 4s linear infinite;
 	}
 	#player .player-control-center {
 		width: 40px;
@@ -455,7 +489,7 @@
 		line-height: 40px;
 	}
 }
-@keyframes scroll {
+@keyframes player-scroll {
 	0% { transform: translateX(0); }
 	40% { transform: translateX(0); }
 	90% { transform: translateX(-100%); }

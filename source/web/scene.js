@@ -76,12 +76,12 @@ scene.list["home"] = {
 		dfrg.appendChild(document.importNode(tmpl.getElementById("main-navbar"), true));
 		dfrg.appendChild(document.importNode(tmpl.getElementById("main-home"), true));
 		let cont = dfrg.children[0].getElementsByClassName("main-menu")[0];
-		cont.children[0].addEventListener("click", (e) => scene.switch("home"));
-		cont.children[1].addEventListener("click", (e) => scene.switch("home-playlists"));
-		cont.children[2].addEventListener("click", (e) => scene.switch("home-artists"));
-		cont.children[3].addEventListener("click", (e) => scene.switch("home-albums"));
-		cont.children[4].addEventListener("click", (e) => scene.switch("home-styles"));
-		cont.children[6].addEventListener("click", (e) => scene.switch("about"));
+		cont.children[0].addEventListener("click", (e) => { scene.switch("home"); });
+		cont.children[1].addEventListener("click", (e) => { scene.switch("home-playlists"); });
+		cont.children[2].addEventListener("click", (e) => { scene.switch("home-artists"); });
+		cont.children[3].addEventListener("click", (e) => { scene.switch("home-albums"); });
+		cont.children[4].addEventListener("click", (e) => { scene.switch("home-styles"); });
+		cont.children[6].addEventListener("click", (e) => { scene.switch("about"); });
 		return dfrg;
 	},
 	display: null
@@ -122,7 +122,15 @@ scene.list["artist"] = {
 		let cont = eles[0].getElementsByClassName("main-cover-artist")[0];
 		this.removeChildren(cont);
 		cont.appendChild(this.buildElement("img", {src: o.logoURL}));
+		cont = eles[0].getElementsByClassName("block-content")[0];
+		cont.children[0].textContent = "艺人介绍";
+		cont.children[1].textContent = o.info ? o.info : "";
 		eles[1].getElementsByClassName("main-title")[0].textContent = o.name;
+		cont = eles[1].getElementsByClassName("main-infolist")[0];
+		this.removeChildren(cont);
+		o.gender && cont.appendChild(this.buildInfoRow("性别", [o.gender]));
+		o.birthday && cont.appendChild(this.buildInfoRow("生日", [o.birthday]));
+		o.area && cont.appendChild(this.buildInfoRow("地区", [o.area]));
 	}
 };
 
@@ -140,6 +148,9 @@ scene.list["album"] = {
 		this.removeChildren(cont);
 		cont.appendChild(this.buildElement("img", {src: o.logoURL}));
 		cont.appendChild(this.buildElement("span", {class: "icon-play"}, o.playCount));
+		cont = eles[0].getElementsByClassName("block-content")[0];
+		cont.children[0].textContent = "专辑介绍";
+		cont.children[1].textContent = o.info ? o.info : "";
 		eles[1].getElementsByClassName("main-title")[0].textContent = o.name;
 		cont = eles[1].getElementsByClassName("main-user")[0];
 		this.removeChildren(cont);
@@ -148,6 +159,12 @@ scene.list["album"] = {
 			cont.appendChild(this.buildElement("img", {src: en.logoURL}));
 			cont.appendChild(this.buildElement("span", null, en.name));
 		}
+		cont = eles[1].getElementsByClassName("main-infolist")[0];
+		this.removeChildren(cont);
+		o.discCount && cont.appendChild(this.buildInfoRow("碟数", [o.discCount]));
+		o.songCount && cont.appendChild(this.buildInfoRow("曲目数", [o.songCount]));
+		o.publishTime && cont.appendChild(this.buildInfoRow("发行时间", [o.publishTime]));
+		o.language && cont.appendChild(this.buildInfoRow("语言", [o.language]));
 	}
 };
 
@@ -177,6 +194,8 @@ scene.list["song"] = {
 		cont = eles[1].getElementsByClassName("main-infolist")[0];
 		this.removeChildren(cont);
 		o.translation && cont.appendChild(this.buildInfoRow("译名", [o.translation]));
+		o.disc && cont.appendChild(this.buildInfoRow("碟 #", [o.disc]));
+		o.track && cont.appendChild(this.buildInfoRow("曲目 #", [o.track]));
 	}
 };
 

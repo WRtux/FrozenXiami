@@ -155,36 +155,7 @@ function getIndices(typ) {
 	}
 }
 
-function inflateEntry(en, onload, onerror) {
-	if (data.pool.file.size < en.offset + en.length) {
-		toast("文件大小错误。");
-		onerror && onerror();
-		return;
-	}
-	if (data.pool.cache.has(en.offset)) {
-		onload(JSON.parse(data.pool.cache.get(en.offset)));
-		return;
-	}
-	let fr = new FileReader();
-	fr.readAsArrayBuffer(data.pool.file.slice(en.offset, en.offset + en.length));
-	fr.addEventListener("load", function (e) {
-		try {
-			let str = new TextDecoder().decode(e.target.result);
-			data.pool.cache.set(en.offset, str);
-			trimPoolCache();
-			onload(JSON.parse(str));
-		} catch (err) {
-			console.error(err);
-			toast(en.name + " 存在数据错误。");
-			onerror && onerror();
-		}
-	});
-	fr.addEventListener("error", function (e) {
-		toast("读取 " + en.name + " 数据失败。");
-		onerror && onerror();
-	});
-}
-function inflateEntryPromise(en) {
+function inflateEntryP(en) {
 	if (data.pool.file.size < en.offset + en.length) {
 		toast("文件大小错误。");
 		return null;
@@ -211,49 +182,12 @@ function inflateEntryPromise(en) {
 		});
 	});
 }
-
-function inflateEntries(ens, onload, oerror) {
-	let ed = ens.reduce((max, en) => Math.max(en.offset + en.length, max), 0);
-	if (data.pool.file.size < ed) {
-		toast("文件大小错误。");
-		onerror && onerror();
-		return;
-	}
-	let buf = new Array();
-	let cnt = 0;
-	for (let en of ens) {
-		if (data.pool.cache.has(en.offset)) {
-			buf.push(JSON.parse(data.pool.cache.get(en.offset)));
-			if (++cnt == ens.length) {
-				trimPoolCache();
-				onload(buf);
-				return;
-			}
-			continue;
-		}
-		let fr = new FileReader();
-		fr.readAsArrayBuffer(data.pool.file.slice(en.offset, en.offset + en.length));
-		fr.addEventListener("load", function (e) {
-			try {
-				let str = new TextDecoder().decode(e.target.result);
-				buf.push(JSON.parse(str));
-				data.pool.cache.set(en.offset, str);
-			} catch (err) {
-				console.error(err);
-				toast(en.name + " 存在数据错误。");
-			}
-			if (++cnt == ens.length) {
-				trimPoolCache();
-				onload(buf);
-			}
-		});
-		fr.addEventListener("error", function (e) {
-			toast("读取 " + en.name + " 数据失败。");
-			++cnt == ens.length && onload(buf);
-		});
-	}
+function inflateEntryA(en, onload, onerror) {
+	let tsk = inflateEntryP(en);
+	tsk ? tsk.then(onload, onerror) : onerror && onerror();
 }
-function inflateEntriesPromise(ens) {
+
+function inflateEntriesP(ens) {
 	let ed = ens.reduce((max, en) => Math.max(en.offset + en.length, max), 0);
 	if (data.pool.file.size < ed) {
 		toast("文件大小错误。");
@@ -272,11 +206,13 @@ function inflateEntriesPromise(ens) {
 			} catch (err) {
 				toast(en.name + " 存在数据错误。");
 				reject();
+				arguments[1] && arguments[1]();
 			}
 		});
 		fr.addEventListener("error", function (e) {
 			toast("读取 " + en.name + " 数据失败。");
 			reject();
+			arguments[1] && arguments[1]();
 		});
 	}));
 	return Promise.allSettled(tsks).then(function (ress) {
@@ -287,6 +223,10 @@ function inflateEntriesPromise(ens) {
 		}
 		return ens;
 	});
+}
+function inflateEntriesA(ens, onload, oerror) {
+	let tsk = inflateEntriesP(ens, onerror);
+	tsk ? tsk.then(onload) : onerror && onerror();
 }
 
 function trimPoolCache(lim) {
@@ -315,12 +255,13 @@ function queryEntryIndex(typ, id, sid) {
 	return null;
 }
 
-function queryEntry(typ, id, sid, onload, onerror) {
-	return inflateEntry(queryEntryIndex(typ, id, sid), onload, onerror);
-}
-function queryEntryPromise(typ, id, sid) {
+function queryEntryP(typ, id, sid) {
 	let en = queryEntryIndex(typ, id, sid);
-	return en && inflateEntryPromise(en);
+	return en && inflateEntryP(en);
+}
+function queryEntryA(typ, id, sid, onload, onerror) {
+	let en = queryEntryIndex(typ, id, sid);
+	en && inflateEntryA(en, onload, onerror);
 }
 
 function searchEntryIndices(typ, ns) {
@@ -332,20 +273,19 @@ function searchEntryIndices(typ, ns) {
 		return ns.every((n) => strs.some((str) => str.includes(n)));
 	});
 }
+async function searchEntryIndicesP(typ, ns) {
+	await null;
+	return searchEntryIndices(typ, ns);
+}
 
-function searchEntries(typ, ns, onload, onerror, off, lim) {
+async function searchEntriesP(typ, ns, sort, off, lim) {
+	await null;
 	let ens = searchEntryIndices(typ, ns);
+	if (sort)
+		ens = sortListEntries(ens, ns);
 	if (off && lim)
 		ens = ens.slice(off, off + lim);
-	inflateEntries(ens, onload, onerror);
-}
-function searchEntriesPromise(typ, ns, off, lim) {
-	return new Promise(function (resolve, reject) {
-		let ens = searchEntryIndices(typ, ns);
-		if (off && lim)
-			ens = ens.slice(off, off + lim);
-		inflateEntriesPromise(ens).then(resolve, reject);
-	});
+	return await inflateEntriesP(ens);
 }
 
 function sortListEntries(ens, ns) {

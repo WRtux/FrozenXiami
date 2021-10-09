@@ -1,145 +1,95 @@
 "use strict";
 
 var data = {
-	pool: {file: null, indices: null, cache: null},
+	pool: {
+		file: null, indices: null, cache: null,
+		progress: null,
+		loaderURL: "worker-load.js", searcherURL: "worker-search.js"
+	},
 	user: null
 };
 
-var readerURL = URL.createObjectURL(new Blob([String.raw
-`"use strict";
+data.buildHexadecimal = function (i, len) {
+	i = Number.parseInt(i);
+	return !Number.isNaN(i) ? "0x" + i.toString(16).padStart(len, '0').toUpperCase() : null;
+};
 
-function readEntryIndex(buf, off) {
-	let vw = new DataView(buf), dec = new TextDecoder();
-	let cnt, len;
-	let en = {indexSize: off};
-	en.offset = vw.getUint32(off), off += 4;
-	en.length = vw.getUint32(off), off += 4;
-	en.id = vw.getUint32(off), off += 4;
-	if (en.id == 0xFFFFFFFF)
-		en.id = null;
-	len = vw.getUint16(off), off += 2;
-	en.sid = dec.decode(buf.slice(off, off + len)), off += len;
-	len = vw.getUint16(off), off += 2;
-	en.name = dec.decode(buf.slice(off, off + len)), off += len;
-	cnt = vw.getUint16(off), off += 2;
-	en.keywords = new Array();
-	for (let i = 0; i < cnt; i++) {
-		len = vw.getUint16(off), off += 2;
-		let str = dec.decode(buf.slice(off, off + len));
-		off += len;
-		str && en.keywords.push(str);
-	}
-	en.indexSize = off - en.indexSize;
-	return en;
-}
+data.readFileP = function (f) {
+	return new Promise(function (resolve, reject) {
+		let fr = new FileReader();
+		fr.readAsArrayBuffer(f);
+		fr.addEventListener("load", (e) => { resolve(e.target.result); });
+		fr.addEventListener("error", (e) => { reject(); });
+	});
+};
 
-function readPoolIndices(buf) {
+async function loadPoolIndicesP(f) {
+	let dat = null;
+	data.pool.progress = "读取索引……";
 	try {
-		let vw = new DataView(buf);
-		let off = 0, cnt = 0;
-		let ins = {artists: new Array(), albums: new Array(), songs: new Array()};
-L1:		while (true) {
-			let typ = vw.getUint8(off++);
-			let dest = null;
-			switch (typ) {
-			case 0x10:
-				dest = ins.artists;
-				break;
-			case 0x11:
-				dest = ins.albums;
-				break;
-			case 0x12:
-				dest = ins.songs;
-				break;
-			case 0x00:
-				break L1;
-			default:
-				self.postMessage({event: "error", code: typ});
-				return;
-			}
-			let en = readEntryIndex(buf, off);
-			off += en.indexSize;
-			dest.push(en);
-			++cnt % 100 == 0 && self.postMessage({event: "progress", count: cnt});
-		}
-		self.postMessage({event: "progress", count: cnt});
-		self.postMessage({event: "load", data: ins});
+		dat = await data.readFileP(f);
 	} catch (err) {
-		self.postMessage({event: "error", code: -1, message: err.message});
-		console.error(err);
+		throw "读取索引失败。";
 	}
-}
-
-self.addEventListener("message", (e) => { readPoolIndices(e.data); });
-`]));
-
-function loadPoolIndices(f, onload, onerror, onprogress) {
-	let fr = new FileReader();
-	fr.readAsArrayBuffer(f);
-	fr.addEventListener("load", function (e) {
-		let wkr = new Worker(readerURL);
-		let cnt = 0;
-		let hndl = onprogress && window.setInterval(() => { onprogress(cnt); }, 200);
-		wkr.addEventListener("message", function (e) {
-			switch (e.data.event) {
-			case "progress":
-				cnt = e.data.count;
-				break;
-			case "load":
-				data.pool.indices = e.data.data;
-				hndl && window.clearInterval(hndl);
-				onload(e.data.data);
-				break;
-			case "error":
-				let typ = e.data.code;
-				hndl && window.clearInterval(hndl);
-				if (typ != -1) {
-					toast("未知索引类型：" + typ.toString(16).padStart(2, '0').toUpperCase());
-				} else {
-					toast("读取索引时发生意外错误。");
-				}
-				onerror && onerror();
-				break;
+	data.pool.progress = "加载索引……";
+	let notify = null, notifyError = null;
+	let wkr = new Worker(data.pool.loaderURL);
+	let buf = new Array();
+	wkr.addEventListener("message", function (e) {
+		let msg = e.data;
+		switch (msg.event) {
+		case "progress":
+			for (let en of msg.data) {
+				buf.push(en);
 			}
-		});
-		wkr.postMessage(e.target.result, [e.target.result]);
-	});
-	fr.addEventListener("error", function (e) {
-		toast("读取索引失败。");
-		onerror && onerror();
-	});
-}
-
-function loadPool(f, onload, onerror, onprogress) {
-	if (f.size <= 16) {
-		toast("文件大小错误。");
-		onerror && onerror();
-		return;
-	}
-	let fr = new FileReader();
-	fr.readAsArrayBuffer(f.slice(0, 8));
-	fr.addEventListener("load", function (e) {
-		let vw = new DataView(e.target.result);
-		let i = vw.getUint32(0), len = vw.getUint32(4);
-		if (i != 0xFE581A4D) {
-			toast("文件头错误：" + i.toString(16).padStart(8, '0').toUpperCase());
-			onerror && onerror();
-		} else if (f.size < 16 + len) {
-			toast("文件大小错误。");
-			onerror && onerror();
-		} else {
-			loadPoolIndices(f.slice(8, 8 + len), function (dat) {
-				data.pool.file = f.slice(16 + len);
-				data.pool.cache = new Map();
-				onload(dat);
-			}, onerror, onprogress);
-			onprogress && onprogress("Ready");
+			data.pool.progress = "加载索引……" + buf.length;
+			break;
+		case "load":
+			notify();
+			break;
+		case "error":
+			notifyError("加载索引错误：" + msg.message +
+				(msg.code != null ? " @" + data.buildHexadecimal(msg.code, 2) : ""));
+			break;
 		}
 	});
-	fr.addEventListener("error", function (e) {
-		toast("读取文件头失败。");
-		onerror && onerror();
-	});
+	wkr.postMessage(dat, [dat]);
+	await new Promise((resolve, reject) => { [notify, notifyError] = [resolve, reject]; });
+	return buf;
+}
+
+async function loadPoolP(f) {
+	let dat = null;
+	data.pool.progress = "读取文件头……";
+	try {
+		if (f.size <= 16)
+			throw undefined;
+		dat = await data.readFileP(f.slice(0, 16));
+	} catch (err) {
+		throw "读取文件头失败。";
+	}
+	let vw = new DataView(dat);
+	if (vw.getUint32(0) != 0xDEAD494A)
+		throw "文件头错误：" + data.buildHexadecimal(vw.getUint32(0), 8);
+	if (vw.getUint32(4) != 0x584D00F0)
+		throw "文件头错误：" + data.buildHexadecimal(vw.getUint32(4), 8);
+	let len = vw.getUint32(8) * 2 ** 32 + vw.getUint32(12);
+	if (f.size < 28 + len)
+		throw "文件大小错误。";
+	let ens = await loadPoolIndicesP(f.slice(16, 16 + len));
+	data.pool.progress = "完成索引……";
+	await undefined;
+	dat = data.pool.indices = {artists: new Array(), albums: new Array(), songs: new Array(), unknown: new Array()};
+	for (let en of ens) {
+		en ? en.type == "artist" ? dat.artists.push(en) :
+			en.type == "album" ? dat.albums.push(en) :
+			en.type == "song" ? dat.songs.push(en) : dat.unknown.push(en)
+		: undefined;
+	}
+	data.pool.file = f.slice(28 + len);
+	data.pool.cache = new Map();
+	data.pool.progress = null;
+	return ens;
 }
 
 function getIndices(typ) {

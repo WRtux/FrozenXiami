@@ -76,6 +76,7 @@ function closeDialog(dlg) {
 	document.getElementById("dialog-file-pool").addEventListener("change", function (e) {
 		if (this.files.length != 1)
 			return;
+		alertDialog("不可用", "读取功能未被实现。"); return; // Remove if implemented
 		let f = this.files[0];
 		this.previousElementSibling.value = f.name;
 		let dlg = alertDialog("加载中", "请稍等……", true);

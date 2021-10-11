@@ -1,4 +1,7 @@
 "use strict";
+/* This file is just a template.
+ * Implement it to load the index file.
+ */
 
 function readEntryIndex(dat, off) {
 	let vw = new DataView(dat), dec = new TextDecoder();

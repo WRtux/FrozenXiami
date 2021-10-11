@@ -55,6 +55,7 @@ async function loadPoolIndicesP(f) {
 	});
 	wkr.postMessage(dat, [dat]);
 	await new Promise((resolve, reject) => { [notify, notifyError] = [resolve, reject]; });
+	wkr.terminate();
 	return buf;
 }
 
@@ -81,7 +82,7 @@ async function loadPoolP(f) {
 	await undefined;
 	dat = data.pool.indices = {artists: new Array(), albums: new Array(), songs: new Array(), unknown: new Array()};
 	for (let en of ens) {
-		en ? en.type == "artist" ? dat.artists.push(en) :
+		en != null ? en.type == "artist" ? dat.artists.push(en) :
 			en.type == "album" ? dat.albums.push(en) :
 			en.type == "song" ? dat.songs.push(en) : dat.unknown.push(en)
 		: undefined;

@@ -1,39 +1,22 @@
 "use strict";
 
 var data = {
-	pool: {
-		file: null, indices: null, cache: null,
-		progress: null,
-		loaderURL: "worker-load.js", searcherURL: "worker-search.js"
-	},
-	user: null
-};
-
-data.buildHexadecimal = function (i, len) {
-	i = Number.parseInt(i);
-	return !Number.isNaN(i) ? "0x" + i.toString(16).padStart(len, '0').toUpperCase() : null;
-};
-
-data.readFileP = function (f) {
-	return new Promise(function (resolve, reject) {
-		let fr = new FileReader();
-		fr.readAsArrayBuffer(f);
-		fr.addEventListener("load", (e) => { resolve(e.target.result); });
-		fr.addEventListener("error", (e) => { reject(); });
-	});
+	pool: {file: null, indices: null, cache: null},
+	user: null,
+	workers: {loadURL: "worker-load.js", searchURL: "worker-search.js", progress: null}
 };
 
 async function loadPoolIndicesP(f) {
 	let dat = null;
-	data.pool.progress = "读取索引……";
+	data.workers.progress = "读取索引……";
 	try {
-		dat = await data.readFileP(f);
+		dat = await H.readFileP(f);
 	} catch (err) {
 		throw "读取索引失败。";
 	}
-	data.pool.progress = "加载索引……";
+	data.workers.progress = "加载索引……";
 	let notify = null, notifyError = null;
-	let wkr = new Worker(data.pool.loaderURL);
+	let wkr = new Worker(data.workers.loadURL);
 	let buf = new Array();
 	wkr.addEventListener("message", function (e) {
 		let msg = e.data;
@@ -42,14 +25,14 @@ async function loadPoolIndicesP(f) {
 			for (let en of msg.data) {
 				buf.push(en);
 			}
-			data.pool.progress = "加载索引……" + buf.length;
+			data.workers.progress = "加载索引……" + buf.length;
 			break;
 		case "load":
 			notify();
 			break;
 		case "error":
 			notifyError("加载索引错误：" + msg.message +
-				(msg.code != null ? " @" + data.buildHexadecimal(msg.code, 2) : ""));
+				(msg.code != null ? " @" + H.buildHexadecimal(msg.code, 2) : ""));
 			break;
 		}
 	});
@@ -61,25 +44,25 @@ async function loadPoolIndicesP(f) {
 
 async function loadPoolP(f) {
 	let dat = null;
-	data.pool.progress = "读取文件头……";
+	data.workers.progress = "读取文件头……";
 	try {
 		if (f.size <= 16)
 			throw undefined;
-		dat = await data.readFileP(f.slice(0, 16));
+		dat = await H.readFileP(f.slice(0, 16));
 	} catch (err) {
 		throw "读取文件头失败。";
 	}
 	let vw = new DataView(dat);
 	if (vw.getUint32(0) != 0xDEAD494A)
-		throw "文件头错误：" + data.buildHexadecimal(vw.getUint32(0), 8);
+		throw "文件头错误：" + H.buildHexadecimal(vw.getUint32(0), 8);
 	if (vw.getUint32(4) != 0x584D00F0)
-		throw "文件头错误：" + data.buildHexadecimal(vw.getUint32(4), 8);
+		throw "文件头错误：" + H.buildHexadecimal(vw.getUint32(4), 8);
 	let len = vw.getUint32(8) * 2 ** 32 + vw.getUint32(12);
 	if (f.size < 28 + len)
 		throw "文件大小错误。";
 	let ens = await loadPoolIndicesP(f.slice(16, 16 + len));
-	data.pool.progress = "完成索引……";
-	await undefined;
+	data.workers.progress = "完成索引……";
+	await H.restP();
 	dat = data.pool.indices = {artists: new Array(), albums: new Array(), songs: new Array(), unknown: new Array()};
 	for (let en of ens) {
 		en != null ? en.type == "artist" ? dat.artists.push(en) :
@@ -89,99 +72,54 @@ async function loadPoolP(f) {
 	}
 	data.pool.file = f.slice(28 + len);
 	data.pool.cache = new Map();
-	data.pool.progress = null;
+	data.workers.progress = null;
 	return ens;
 }
 
 function getIndices(typ) {
-	switch (typ) {
-	case "artist":
-		return data.pool.indices.artists;
-	case "album":
-		return data.pool.indices.albums;
-	case "song":
-		return data.pool.indices.songs;
-	default:
-		return null;
-	}
+	return typ == "artist" ? data.pool.indices.artists :
+		typ == "album" ? data.pool.indices.albums :
+		typ == "song" ? data.pool.indices.songs :
+		typ == "unknown" ? data.pool.indices.unknown : null;
 }
 
-function inflateEntryP(en) {
-	if (data.pool.file.size < en.offset + en.length) {
-		toast("文件大小错误。");
-		return null;
-	}
+async function inflateEntryP(en) {
+	if (en.offset + en.length > data.pool.file.size)
+		throw "文件大小错误。";
 	if (data.pool.cache.has(en.offset))
-		return Promise.resolve(JSON.parse(data.pool.cache.get(en.offset)));
-	return new Promise(function (resolve, reject) {
-		let fr = new FileReader();
-		fr.readAsArrayBuffer(data.pool.file.slice(en.offset, en.offset + en.length));
-		fr.addEventListener("load", function (e) {
-			try {
-				let str = new TextDecoder().decode(e.target.result);
-				data.pool.cache.set(en.offset, str);
-				trimPoolCache();
-				resolve(JSON.parse(str));
-			} catch (err) {
-				toast(en.name + " 存在数据错误。");
-				reject();
-			}
-		});
-		fr.addEventListener("error", function (e) {
-			toast("读取 " + en.name + " 数据失败。");
-			reject();
-		});
-	});
+		return JSON.parse(data.pool.cache.get(en.offset));
+	let dat = null;
+	try {
+		dat = await H.readFileP(data.pool.file.slice(en.offset, en.offset + en.length));
+		let str = new TextDecoder().decode(dat);
+		data.pool.cache.set(en.offset, str);
+		arguments[1] != true && trimPoolCache();
+		return JSON.parse(str);
+	} catch (err) {
+		console.warn("Data error", err, en);
+		throw dat != null ? "读取 " + en.name + " 数据失败。" : en.name + " 数据存在错误。";
+	}
 }
 function inflateEntryA(en, onload, onerror) {
-	let tsk = inflateEntryP(en);
-	tsk ? tsk.then(onload, onerror) : onerror && onerror();
+	inflateEntryP(en).then(onload, H.filterFunction(onerror) || toast);
 }
 
-function inflateEntriesP(ens) {
-	let ed = ens.reduce((max, en) => Math.max(en.offset + en.length, max), 0);
-	if (data.pool.file.size < ed) {
-		toast("文件大小错误。");
+async function inflateEntriesP(ens) {
+	let onerror = arguments[1];
+	let tsks = ens.map((en) => inflateEntryP(en, true).catch(function (str) {
+		H.filterGetFunction(onerror)(str);
 		return null;
-	}
-	let tsks = ens.map((en) => new Promise(function (resolve, reject) {
-		if (data.pool.cache.has(en.offset))
-			resolve(JSON.parse(data.pool.cache.get(en.offset)));
-		let fr = new FileReader();
-		fr.readAsArrayBuffer(data.pool.file.slice(en.offset, en.offset + en.length));
-		fr.addEventListener("load", function (e) {
-			try {
-				let str = new TextDecoder().decode(e.target.result);
-				data.pool.cache.set(en.offset, str);
-				resolve(JSON.parse(str));
-			} catch (err) {
-				toast(en.name + " 存在数据错误。");
-				reject();
-				arguments[1] && arguments[1]();
-			}
-		});
-		fr.addEventListener("error", function (e) {
-			toast("读取 " + en.name + " 数据失败。");
-			reject();
-			arguments[1] && arguments[1]();
-		});
 	}));
-	return Promise.allSettled(tsks).then(function (ress) {
-		trimPoolCache();
-		let ens = new Array();
-		for (let res of ress) {
-			res.status == "fulfilled" && res.value && ens.push(res.value);
-		}
-		return ens;
-	});
+	ens = await Promise.all(tsks);
+	trimPoolCache();
+	return ens;
 }
 function inflateEntriesA(ens, onload, oerror) {
-	let tsk = inflateEntriesP(ens, onerror);
-	tsk ? tsk.then(onload) : onerror && onerror();
+	inflateEntriesP(ens, H.filterFunction(onerror) || toast).then(onload);
 }
 
 function trimPoolCache(lim) {
-	lim = lim || 10000;
+	lim = (lim != null) ? lim : 10000;
 	if (data.pool.cache.size <= lim)
 		return;
 	for (let off of data.pool.cache.keys()) {
@@ -194,13 +132,13 @@ function trimPoolCache(lim) {
 function queryEntryIndex(typ, id, sid) {
 	typ = getIndices(typ);
 	let ens = [typ.find((en) => en.id == id), typ.find((en) => en.sid == sid)];
-	if (id && ens[0]) {
-		if (sid && ens[0].sid != sid)
-			toast(ens[0].name + " SID 不匹配。");
+	if (id != null && ens[0] != null) {
+		if (sid != null && ens[0].sid != sid)
+			console.warn("SID mismatch", sid, ens[0]);
 		return ens[0];
-	} else if (sid && ens[1]) {
-		if (id && ens[1].id != id)
-			toast(ens[1].name + " ID 不匹配。");
+	} else if (sid != null && ens[1] != null) {
+		if (id != null && ens[1].id != id)
+			console.warn("ID mismatch", id, ens[1]);
 		return ens[1];
 	}
 	return null;
@@ -208,33 +146,41 @@ function queryEntryIndex(typ, id, sid) {
 
 function queryEntryP(typ, id, sid) {
 	let en = queryEntryIndex(typ, id, sid);
-	return en && inflateEntryP(en);
-}
-function queryEntryA(typ, id, sid, onload, onerror) {
-	let en = queryEntryIndex(typ, id, sid);
-	en && inflateEntryA(en, onload, onerror);
+	return en != null ? inflateEntryP(en) : null;
 }
 
 function searchEntryIndices(typ, ns) {
 	ns = ns.map((n) => n.toLowerCase());
 	return getIndices(typ).filter(function (en) {
-		let strs = Array.from(en.keywords);
-		strs.unshift(en.name);
-		strs = strs.map((str) => str.toLowerCase());
+		let strs = en.keywords.filter((k) => k.score >= 0 && k.string);
+		strs = strs.map((k) => k.string.toLowerCase());
 		return ns.every((n) => strs.some((str) => str.includes(n)));
 	});
 }
 async function searchEntryIndicesP(typ, ns) {
-	await null;
-	return searchEntryIndices(typ, ns);
+	ns = ns.map((n) => n.toLowerCase());
+	let ens = new Array();
+	let i = 0, t = performance.now();
+	for(let en of getIndices(typ)) {
+		let strs = en.keywords.filter((k) => k.score >= 0 && k.string);
+		strs = strs.map((k) => k.string.toLowerCase());
+		ns.every((n) => strs.some((str) => str.includes(n))) && ens.push(en);
+		if (++i >= 400) {
+			i = 0;
+			if (performance.now() - t >= 100) {
+				await H.restP();
+				t = performance.now();
+			}
+		}
+	}
+	return ens;
 }
 
 async function searchEntriesP(typ, ns, sort, off, lim) {
-	await null;
-	let ens = searchEntryIndices(typ, ns);
+	let ens = await searchEntryIndicesP(typ, ns);
 	if (sort)
 		ens = sortListEntries(ens, ns);
-	if (off && lim)
+	if (off != null && lim != null)
 		ens = ens.slice(off, off + lim);
 	return await inflateEntriesP(ens);
 }
@@ -248,13 +194,15 @@ function sortListEntries(ens, ns) {
 			nns = nns.filter((n) => !res.includes(n));
 			return res;
 		};
-		let scr = filter(en.name.toLowerCase()).length * 6 / ns.length;
-		if (en.translation)
-			scr += filter(en.translation.toLowerCase()).length * 5 / ns.length;
-		if (en.subName)
-			scr += filter(en.subName.toLowerCase()).length * 3 / ns.length;
-		if (en.playCount && en.playCount >= 1000)
-			scr += Math.log10(en.playCount) - 3;
+		let scr = 0;
+		for (let k of en.keywords) {
+			if (k.score >= 0 && k.string)
+				scr += k.score * filter(k.string.toLowerCase()).length / ns.length;
+		}
+		if (en.counts[0] >= 1000)
+			scr += Math.log10(en.counts[0]) - 3;
+		if (en.counts[1] >= 1000)
+			scr += (Math.log10(en.counts[1]) - 3) * 0.4;
 		return {entry: en, score: scr};
 	});
 	return map.sort((a, b) => b.score - a.score).map((en) => en.entry);

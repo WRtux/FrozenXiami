@@ -21,5 +21,32 @@ var H = {
 	},
 	restP() {
 		return new Promise((resolve, reject) => { window.setTimeout(resolve, 0); });
+	},
+	buildElement(typ, attrs, txt) {
+		let ele = document.createElement(typ);
+		for (let n in attrs) {
+			ele.setAttribute(n, attrs[n]);
+		}
+		if (txt != null)
+			ele.textContent = txt;
+		return ele;
+	},
+	buildInfoRow(tt, infs) {
+		let dfrg = document.createDocumentFragment();
+		dfrg.appendChild(this.buildElement("dt", null, tt));
+		for (let inf of infs != null ? infs : "") {
+			dfrg.appendChild(this.buildElement("dd", null, inf));
+		}
+		return dfrg;
+	},
+	replaceChildrenClass(cont, src, dest) {
+		for (let ele of cont.getElementsByClassName(src)) {
+			ele.classList.replace(src, dest);
+		}
+	},
+	removeChildren(cont) {
+		while (cont.hasChildNodes()) {
+			cont.removeChild(cont.firstChild);
+		}
 	}
 };

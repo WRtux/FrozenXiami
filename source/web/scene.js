@@ -4,63 +4,7 @@ var scene = {
 	current: "load", list: new Object(), helper: new Object()
 };
 
-scene.switch = function (n) {
-	let sce = this.list[n];
-	let dfrg = null;
-	if (sce) {
-		sce.$ = this.helper;
-		dfrg = sce.createMain(page.templates.main);
-		sce.$ = null;
-	}
-	if (dfrg == null)
-		return null;
-	this.helper.removeChildren(page.main);
-	page.main.appendChild(dfrg);
-	this.helper.activateMenu(...sce.menuConfig);
-	this.current = n;
-	return dfrg;
-};
-
-scene.display = function (o) {
-	let sce = this.list[this.current];
-	if (sce && sce.display) {
-		sce.$ = this.helper;
-		sce.display(page.main.children, o).finally(() => { sce.$ = null; });
-	}
-};
-
-scene.helper.buildElement = function (typ, attrs, txt) {
-	let ele = document.createElement(typ);
-	for (let n in attrs || "") {
-		ele.setAttribute(n, attrs[n]);
-	}
-	if (txt)
-		ele.textContent = txt;
-	return ele;
-};
-
-scene.helper.buildInfoRow = function (tt, infs) {
-	let dfrg = document.createDocumentFragment();
-	dfrg.appendChild(this.buildElement("dt", null, tt));
-	for (let inf of infs || "") {
-		dfrg.appendChild(this.buildElement("dd", null, inf));
-	}
-	return dfrg;
-};
-
-scene.helper.replaceChildrenClass = function (cont, src, dest) {
-	for (let ele of cont.getElementsByClassName(src)) {
-		ele.classList.replace(src, dest);
-	}
-};
-
-scene.helper.removeChildren = function (cont) {
-	while (cont.hasChildNodes()) {
-		cont.removeChild(cont.firstChild);
-	}
-};
-
-scene.helper.activateMenu = function (i, j) {
+scene.activateMenu = function (i, j) {
 	if (i != null) {
 		let ele = document.querySelector("#nav> .nav-item.block-active");
 		ele != null && ele.classList.remove("block-active");
@@ -76,6 +20,24 @@ scene.helper.activateMenu = function (i, j) {
 			ele != null && ele.classList.add("block-active");
 		}
 	}
+};
+
+scene.switch = function (n) {
+	let sce = this.list[n];
+	let dfrg = sce && sce.createMain(page.templates.main);
+	if (dfrg == null)
+		return null;
+	H.removeChildren(page.main);
+	page.main.appendChild(dfrg);
+	this.activateMenu(...sce.menuConfig);
+	this.current = n;
+	return dfrg;
+};
+
+scene.display = function (o) {
+	let sce = this.list[this.current];
+	return sce && H.filterFunction(sce.display) ?
+		Promise.resolve(sce.display(page.main.children, o)) : null;
 };
 
 scene.list["home"] = {
@@ -123,23 +85,23 @@ scene.list["artist"] = {
 		let dfrg = document.createDocumentFragment();
 		dfrg.appendChild(document.importNode(tmpl.getElementById("main-listbar"), true));
 		dfrg.appendChild(document.importNode(tmpl.getElementById("main-list"), true));
-		this.$.replaceChildrenClass(dfrg.children[0], "main-cover-list", "main-cover-artist");
+		H.replaceChildrenClass(dfrg.children[0], "main-cover-list", "main-cover-artist");
 		dfrg.children[1].getElementsByClassName("main-user")[0].remove();
 		return dfrg;
 	},
-	display: async function (eles, o) {
+	display: function (eles, o) {
 		let cont = eles[0].getElementsByClassName("main-cover-artist")[0];
-		this.$.removeChildren(cont);
-		cont.appendChild(this.$.buildElement("img", {src: o.logoURL}));
+		H.removeChildren(cont);
+		cont.appendChild(H.buildElement("img", {src: o.logoURL}));
 		cont = eles[0].getElementsByClassName("block-content")[0];
 		cont.children[0].textContent = "艺人介绍";
-		cont.children[1].textContent = o.info ? o.info : "";
+		cont.children[1].textContent = (o.info != null) ? o.info : "";
 		eles[1].getElementsByClassName("main-title")[0].textContent = o.name;
 		cont = eles[1].getElementsByClassName("main-infolist")[0];
-		this.$.removeChildren(cont);
-		o.gender && cont.appendChild(this.$.buildInfoRow("性别", [o.gender]));
-		o.birthday && cont.appendChild(this.$.buildInfoRow("生日", [o.birthday]));
-		o.area && cont.appendChild(this.$.buildInfoRow("地区", [o.area]));
+		H.removeChildren(cont);
+		o.gender && cont.appendChild(H.buildInfoRow("性别", [o.gender]));
+		o.birthday && cont.appendChild(H.buildInfoRow("生日", [o.birthday]));
+		o.area && cont.appendChild(H.buildInfoRow("地区", [o.area]));
 	}
 };
 
@@ -149,31 +111,31 @@ scene.list["album"] = {
 		let dfrg = document.createDocumentFragment();
 		dfrg.appendChild(document.importNode(tmpl.getElementById("main-listbar"), true));
 		dfrg.appendChild(document.importNode(tmpl.getElementById("main-list"), true));
-		this.$.replaceChildrenClass(dfrg.children[0], "main-cover-list", "main-cover-album");
+		H.replaceChildrenClass(dfrg.children[0], "main-cover-list", "main-cover-album");
 		return dfrg;
 	},
 	display: async function (eles, o) {
 		let cont = eles[0].getElementsByClassName("main-cover-album")[0];
-		this.$.removeChildren(cont);
-		cont.appendChild(this.$.buildElement("img", {src: o.logoURL}));
-		cont.appendChild(this.$.buildElement("span", {class: "icon-play"}, o.playCount));
+		H.removeChildren(cont);
+		cont.appendChild(H.buildElement("img", {src: o.logoURL}));
+		cont.appendChild(H.buildElement("span", {class: "icon-play"}, o.playCount));
 		cont = eles[0].getElementsByClassName("block-content")[0];
 		cont.children[0].textContent = "专辑介绍";
-		cont.children[1].textContent = o.info ? o.info : "";
+		cont.children[1].textContent = (o.info != null) ? o.info : "";
 		eles[1].getElementsByClassName("main-title")[0].textContent = o.name;
 		cont = eles[1].getElementsByClassName("main-user")[0];
-		this.$.removeChildren(cont);
-		for (let ren of o.artists || "") {
-			let en = await queryEntryPromise("artist", ren.id, ren.sid);
-			cont.appendChild(this.$.buildElement("img", {src: en.logoURL}));
-			cont.appendChild(this.$.buildElement("span", null, en.name));
+		H.removeChildren(cont);
+		for (let ren of o.artists != null ? o.artists : "") {
+			let en = await queryEntryP("artist", ren.id, ren.sid);
+			cont.appendChild(H.buildElement("img", {src: en.logoURL}));
+			cont.appendChild(H.buildElement("span", null, en.name));
 		}
 		cont = eles[1].getElementsByClassName("main-infolist")[0];
-		this.$.removeChildren(cont);
-		o.discCount && cont.appendChild(this.$.buildInfoRow("碟片数", [o.discCount]));
-		o.songCount && cont.appendChild(this.$.buildInfoRow("曲目数", [o.songCount]));
-		o.publishTime && cont.appendChild(this.$.buildInfoRow("发行时间", [o.publishTime]));
-		o.language && cont.appendChild(this.$.buildInfoRow("语言", [o.language]));
+		H.removeChildren(cont);
+		o.discCount && cont.appendChild(H.buildInfoRow("碟片数", [o.discCount]));
+		o.songCount && cont.appendChild(H.buildInfoRow("曲目数", [o.songCount]));
+		o.publishTime && cont.appendChild(H.buildInfoRow("发行时间", [o.publishTime]));
+		o.language && cont.appendChild(H.buildInfoRow("语言", [o.language]));
 	}
 };
 
@@ -186,25 +148,25 @@ scene.list["song"] = {
 		return dfrg;
 	},
 	display: async function (eles, o) {
-		let en = await queryEntryPromise("album", o.album.id, o.album.sid);
+		let en = await queryEntryP("album", o.album.id, o.album.sid);
 		let cont = eles[0].getElementsByClassName("main-cover-song")[0];
-		this.$.removeChildren(cont);
-		cont.appendChild(this.$.buildElement("img", {src: en.logoURL}));
-		cont.appendChild(this.$.buildElement("span", {class: "icon-play"}, o.playCount));
+		H.removeChildren(cont);
+		cont.appendChild(H.buildElement("img", {src: en.logoURL}));
+		cont.appendChild(H.buildElement("span", {class: "icon-play"}, o.playCount));
 		cont = eles[0].getElementsByClassName("main-infolist")[0];
-		this.$.removeChildren(cont);
-		cont.appendChild(this.$.buildInfoRow("专辑", [o.album.name]));
+		H.removeChildren(cont);
+		cont.appendChild(H.buildInfoRow("专辑", [o.album.name]));
 		eles[1].getElementsByClassName("main-title")[0].textContent = o.name;
-		en = await queryEntryPromise("artist", o.artist.id, o.artist.sid);
+		en = await queryEntryP("artist", o.artist.id, o.artist.sid);
 		cont = eles[1].getElementsByClassName("main-user")[0];
-		this.$.removeChildren(cont);
-		cont.appendChild(this.$.buildElement("img", {src: en.logoURL}));
-		cont.appendChild(this.$.buildElement("span", null, en.name));
+		H.removeChildren(cont);
+		cont.appendChild(H.buildElement("img", {src: en.logoURL}));
+		cont.appendChild(H.buildElement("span", null, en.name));
 		cont = eles[1].getElementsByClassName("main-infolist")[0];
-		this.$.removeChildren(cont);
-		o.translation && cont.appendChild(this.$.buildInfoRow("译名", [o.translation]));
-		o.disc && cont.appendChild(this.$.buildInfoRow("碟片 #", [o.disc]));
-		o.track && cont.appendChild(this.$.buildInfoRow("曲目 #", [o.track]));
+		H.removeChildren(cont);
+		o.translation && cont.appendChild(H.buildInfoRow("译名", [o.translation]));
+		o.disc && cont.appendChild(H.buildInfoRow("碟片 #", [o.disc]));
+		o.track && cont.appendChild(H.buildInfoRow("曲目 #", [o.track]));
 	}
 };
 

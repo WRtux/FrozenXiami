@@ -18,13 +18,13 @@ function toast(inf, t) {
 	ele.addEventListener("click", (e) => { clearToast(ele); });
 	ele.firstElementChild.textContent = inf;
 	page.masks.toast.appendChild(ele);
-	window.setTimeout(() => { clearToast(ele); }, t || 2000);
+	window.setTimeout(() => { clearToast(ele); }, t != null ? t : 2000);
 	return ele;
 }
 
 function clearToast(ele) {
 	ele.classList.add("toast-clear");
-	window.setTimeout(() => { ele.parentElement && ele.remove(); }, 300);
+	window.setTimeout(() => { ele.parentElement != null && ele.remove(); }, 300);
 }
 
 function openDialog(n) {
@@ -79,8 +79,12 @@ function closeDialog(dlg) {
 		alertDialog("不可用", "读取功能未被实现。"); return; // Remove if implemented
 		let f = this.files[0];
 		this.previousElementSibling.value = f.name;
-		let dlg = alertDialog("加载中", "请稍等……", true);
-		let hndl = window.setInterval(() => { updateDialog(dlg, data.pool.progress); }, 100);
+		let inf = "请稍等……";
+		let dlg = alertDialog("加载中", inf, true);
+		let hndl = window.setInterval(function () {
+			if (data.workers.progress != null && data.workers.progress != inf)
+				updateDialog(dlg, inf = data.workers.progress);
+		}, 100);
 		loadPoolP(f).finally(function () {
 			window.clearInterval(hndl);
 			closeDialog(dlg);

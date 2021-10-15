@@ -1,0 +1,41 @@
+name: Build
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Copy files
+        run: "cp -r -f -T source/ .temp/"
+      - name: Minify files
+        uses: nizarmah/auto-minify@v2.1
+        with:
+          directory: ".temp/"
+          overwrite: true
+          js_engine: uglify-js
+      - name: Integrate files
+        run: |
+          pushd .temp/web/
+          mv -f helper.js main.js
+          cat page.js >>main.js
+          rm -f page.js
+          cat scene.js >>main.js
+          rm -f scene.js
+          for f in worker-*.js
+          do
+           f=${f%.js}
+           echo -n "data.workers.${f#worker-}URL=URL.createObjectURL(new Blob([\`" >>data.js
+           cat ${f}.js >>data.js
+           echo -n "\`]));" >>data.js
+           rm ${f}.js
+          done
+          popd
+          cp -r -f -T .temp/ site/
+          rm -r -f .temp/
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Automated build"

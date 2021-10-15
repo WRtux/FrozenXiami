@@ -1,0 +1,52 @@
+name: Build
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Copy files
+        run: "cp -r -f -T source/ .temp/"
+      - name: Minify files
+        uses: nizarmah/auto-minify@v2.1
+        with:
+          directory: ".temp/"
+          overwrite: true
+          js_engine: uglify-js
+      - name: Integrate files
+        run: |
+          shopt -s extglob
+          pushd .temp/
+          for f in `find -type f -name "*-site.*"`; do
+           rm -f ${f%-site.*}.${f##*.}
+           mv -f $f ${f%-site.*}.${f##*.}
+          done
+          cd web/
+          for f in !(frame|main).css; do
+           cat $f >>main.css
+           rm -f $f
+          done
+          for f in worker-*.js; do
+           f=${f%.js}
+           echo -n "data.workers.${f#worker-}URL=URL.createObjectURL(new Blob([\`" >>data.js
+           cat ${f}.js >>data.js
+           echo -n "\`]));" >>data.js
+           rm -f ${f}.js
+          done
+          for f in !(main|data).js; do
+           cat $f >>main.js
+           rm -f $f
+          done
+          for f in `find -type f -name "*.css" -or -name "*.js"`; do
+           mv -f $f ${f%.*}.min.${f##*.}
+          done
+          popd
+          cp -r -f -T .temp/ site/
+          rm -r -f .temp/
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Automated build"

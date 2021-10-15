@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+ <title>FrozenXiami</title>
+ <link rel="stylesheet" href="web/frame.min.css" />
+ <link rel="stylesheet" href="web/main.min.css" />
+ <link rel="stylesheet" href="web/font/player.min.css" />
+</head>
+
+<body>
+
+<nav id="nav">
+ <img class="nav-logo" src="web/logo.png" alt="Logo" />
+ <a class="nav-item">发现</a>
+ <a class="nav-item">个人</a>
+ <a class="nav-item">检索</a>
+ <div class="nav-side">
+  <button id="nav-search" class="nav-item icon">⚲</button>
+  <button id="nav-file" class="nav-item icon">⚫</button>
+  <span id="nav-avatar" class="nav-avatar">用户</span>
+ </div>
+</nav>
+
+<main id="main">
+
+<template id="main-template">
+ <aside id="main-navbar" class="main-sidebar block-dynmaic">
+  <ul class="main-menu">
+   <li>推荐</li>
+   <li>精选集</li>
+   <li>艺人</li>
+   <li>专辑</li>
+   <li>曲风流派</li>
+   <li>更多</li>
+   <li>站点信息</li>
+  </ul>
+ </aside>
+ <aside id="main-listbar" class="main-sidebar block-dynamic">
+  <div class="main-cover-list"><!-- Dynamic --></div>
+  <section class="block-content">
+   <h3><!-- Dynamic --></h3>
+   <p><!-- Dynamic --></p>
+  </section>
+ </aside>
+ <aside id="main-songbar" class="main-sidebar block-dynamic">
+  <div class="main-cover-song"><!-- Dynamic --></div>
+  <dl class="main-infolist"><!-- Dynamic --></dl>
+ </aside>
+ <article id="main-home" class="main-main block-dynmaic">
+  <header class="main-banner">
+   <img src="media/home/banner-1.jpg" alt="主图" />
+   <img src="media/home/banner-2.jpg" alt="主图" />
+   <img src="media/home/banner-3.jpg" alt="主图" />
+  </header>
+  <h2 class="main-title">推荐歌单</h2>
+  <ul class="main-flow-list"><!-- Dynamic --></ul>
+  <h2 class="main-title">热门艺人</h2>
+  <ul class="main-flow"><!-- Dynamic --></ul>
+  <h2 class="main-title">曲风流派</h2>
+  <ul class="main-flow-style"><!-- Dynamic --></ul>
+  <h2 class="main-title">统计摘要</h2>
+  <!-- TODO -->
+ </article>
+ <article id="main-list" class="main-main block-dynamic">
+  <h1 class="main-title"><!-- Dynamic --></h1>
+  <div class="main-user"><!-- Dynamic --></div>
+  <dl class="main-infolist"><!-- Dynamic --></dl>
+  <!-- TODO -->
+ </article>
+ <article id="main-song" class="main-main block-dynamic">
+  <h1 class="main-title"><!-- Dynamic --></h1>
+  <div class="main-user"><!-- Dynamic --></div>
+  <dl class="main-infolist"><!-- Dynamic --></dl>
+  <section class="block-content">
+   <h3>歌词</h3>
+   <!-- Dynamic -->
+  </section>
+ </article>
+</template>
+
+<article class="main-main block-content block-dynamic">
+ <h2>未加载文件</h2>
+ <p>加载 <span class="icon">⚫</span> 信息池文件以开始浏览。</p>
+ <p>子版本：<q>20211015.0</q></p>
+</article>
+
+</main>
+
+<aside id="player">
+ <div class="player-top">
+  <span id="player-progress" class="player-progress">00:00/--:--</span>
+ </div><div class="player-side">
+  <img id="player-cover" class="player-cover" alt="封面" />
+  <div class="player-info">
+   <span id="player-title">标题</span>
+   <span id="player-artist">艺人</span>
+  </div>
+ </div><div class="player-control">
+  <button id="player-prev" class="player-control-side icon">⏪</button>
+  <button id="player-play" class="player-control-center icon">▶</button>
+  <button id="player-next" class="player-control-side icon">⏩</button>
+ </div><div class="player-side">
+  <button class="player-item icon">⍾</button>
+  <button id="player-more" class="player-item icon">…</button>
+ </div>
+</aside>
+
+<div id="mask-toast">
+ <template id="toast-template">
+  <div class="toast"><span><!-- Dynamic --></span></div>
+ </template>
+</div>
+
+<div id="mask-dialog">
+ <template id="dialog-template">
+  <div class="dialog-mask"><aside id="dialog" class="dialog block-content">
+   <h2><!-- Dynamic --></h2><button class="dialog-close"></button>
+   <p><!-- Dynamic --></p>
+  </aside></div>
+ </template>
+ <div class="dialog-mask"><aside id="dialog-search" class="dialog block-content">
+  <h2>快速搜索</h2><button class="dialog-close"></button>
+  <p>根据关键词按默认排序进行即时搜索（最多显示 100 条结果）。<br />要进行自定义的搜索，请使用检索页。</p>
+  <div class="block-line">
+   <input type="text" placeholder="关键词" />
+   <button id="dialog-search-search" class="icon">⚲</button>
+  </div>
+  <!-- TODO -->
+ </aside></div>
+ <div class="dialog-mask"><aside id="dialog-file" class="dialog block-content">
+  <h2>信息池文件</h2><button class="dialog-close"></button>
+  <p>仅支持带索引的信息池（<q>*.ijsom</q>）。JSON 数据需进行索引条目操作。</p>
+  <div class="block-line">
+   <input type="text" disabled placeholder="--" />
+   <input id="dialog-file-pool" type="file" />
+  </div>
+  <h2>用户文件</h2>
+  <div class="block-line">
+   <input type="text" disabled placeholder="--" />
+   <input id="dialog-file-user" type="file" accept="application/json" />
+  </div>
+ </aside></div>
+</div>
+
+<div id="script">
+ <script src="web/main.min.js"></script>
+ <script src="web/data.min.js"></script>
+</div>
+
+</body>
+
+</html>

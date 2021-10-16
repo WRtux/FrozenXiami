@@ -18,19 +18,26 @@ jobs:
           js_engine: uglify-js
       - name: Integrate files
         run: |
-          pushd .temp/web/
-          mv -f helper.js main.js
-          cat page.js >>main.js
-          rm -f page.js
-          cat scene.js >>main.js
-          rm -f scene.js
-          for f in worker-*.js
-          do
+          shopt -s extglob
+          shopt -s globstar
+          pushd .temp/
+          for f in **-site.*; do
+           mv -f $f ${f%-site.*}.${f##*.}
+          done
+          cd web/
+          for f in worker-*.js; do
            f=${f%.js}
            echo -n "data.workers.${f#worker-}URL=URL.createObjectURL(new Blob([\`" >>data.js
            cat ${f}.js >>data.js
            echo -n "\`]));" >>data.js
-           rm ${f}.js
+           rm -f ${f}.js
+          done
+          for f in !(main|data).js; do
+           cat $f >>main.js
+           rm -f $f
+          done
+          for f in **.css **.js; do
+           mv -f $f ${f%.*}.min.${f##*.}
           done
           popd
           cp -r -f -T .temp/ site/

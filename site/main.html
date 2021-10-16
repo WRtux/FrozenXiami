@@ -6,11 +6,11 @@
  <meta charset="UTF-8" />
  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
  <title>FrozenXiami</title>
- <link rel="stylesheet" href="web/frame.css" />
- <link rel="stylesheet" href="web/main.css" />
- <link rel="stylesheet" href="web/block.css" />
- <link rel="stylesheet" href="web/mask.css" />
- <link rel="stylesheet" href="web/font/player.css" />
+ <link rel="stylesheet" href="web/frame.min.css" />
+ <link rel="stylesheet" href="web/main.min.css" />
+ <link rel="stylesheet" href="web/block.min.css" />
+ <link rel="stylesheet" href="web/mask.min.css" />
+ <link rel="stylesheet" href="web/font/player.min.css" />
 </head>
 
 <body>
@@ -140,6 +140,7 @@
    <input type="text" disabled placeholder="--" />
    <input id="dialog-file-pool" type="file" />
   </div>
+  <p>可 <a href="data/get-pool-eval">点击此</a> 获取评估用信息池（压缩文件）。</p>
   <h2>用户文件</h2>
   <div class="block-line">
    <input type="text" disabled placeholder="--" />
@@ -149,10 +150,8 @@
 </div>
 
 <div id="script">
- <script src="web/helper.js"></script>
- <script src="web/page.js"></script>
- <script src="web/scene.js"></script>
- <script src="web/data.js"></script>
+ <script src="web/main.min.js"></script>
+ <script src="web/data.min.js"></script>
 </div>
 
 </body>

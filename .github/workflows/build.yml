@@ -19,12 +19,16 @@ jobs:
       - name: Integrate files
         run: |
           shopt -s extglob
-          shopt -s globstar
           pushd .temp/
-          for f in **-site.*; do
+          for f in `find -type f -name "*-site.*"`; do
+           rm -f ${f%-site.*}.${f##*.}
            mv -f $f ${f%-site.*}.${f##*.}
           done
           cd web/
+          for f in !(frame|main).css; do
+           cat $f >>main.css
+           rm -f $f
+          done
           for f in worker-*.js; do
            f=${f%.js}
            echo -n "data.workers.${f#worker-}URL=URL.createObjectURL(new Blob([\`" >>data.js
@@ -36,7 +40,7 @@ jobs:
            cat $f >>main.js
            rm -f $f
           done
-          for f in **.css **.js; do
+          for f in `find -type f -name "*.css" -or -name "*.js"`; do
            mv -f $f ${f%.*}.min.${f##*.}
           done
           popd

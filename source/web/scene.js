@@ -89,7 +89,8 @@ scene.list["artist"] = {
 		dfrg.children[1].getElementsByClassName("main-user")[0].remove();
 		return dfrg;
 	},
-	display: function (eles, o) {
+	display: async function (eles, o) {
+		o = (o.type == null) ? o : await inflateEntryP(o);
 		let cont = eles[0].getElementsByClassName("main-cover-artist")[0];
 		H.removeChildren(cont);
 		cont.appendChild(H.buildElement("img", {src: o.logoURL}));
@@ -115,6 +116,7 @@ scene.list["album"] = {
 		return dfrg;
 	},
 	display: async function (eles, o) {
+		o = (o.type == null) ? o : await inflateEntryP(o);
 		let cont = eles[0].getElementsByClassName("main-cover-album")[0];
 		H.removeChildren(cont);
 		cont.appendChild(H.buildElement("img", {src: o.logoURL}));
@@ -126,8 +128,8 @@ scene.list["album"] = {
 		cont = eles[1].getElementsByClassName("main-user")[0];
 		H.removeChildren(cont);
 		for (let ren of o.artists != null ? o.artists : "") {
-			let en = await queryEntryP("artist", ren.id, ren.sid);
-			cont.appendChild(H.buildElement("img", {src: en.logoURL}));
+			let en = queryEntryIndex("artist", ren.id, ren.sid);
+			cont.appendChild(H.buildElement("img", {src: en.keywords[1].string}));
 			cont.appendChild(H.buildElement("span", null, en.name));
 		}
 		cont = eles[1].getElementsByClassName("main-infolist")[0];
@@ -148,19 +150,20 @@ scene.list["song"] = {
 		return dfrg;
 	},
 	display: async function (eles, o) {
-		let en = await queryEntryP("album", o.album.id, o.album.sid);
+		o = (o.type == null) ? o : await inflateEntryP(o);
+		let en = queryEntryIndex("album", o.album.id, o.album.sid);
 		let cont = eles[0].getElementsByClassName("main-cover-song")[0];
 		H.removeChildren(cont);
-		cont.appendChild(H.buildElement("img", {src: en.logoURL}));
+		cont.appendChild(H.buildElement("img", {src: en.keywords[1].string}));
 		cont.appendChild(H.buildElement("span", {class: "icon-play"}, o.playCount));
 		cont = eles[0].getElementsByClassName("main-infolist")[0];
 		H.removeChildren(cont);
-		cont.appendChild(H.buildInfoRow("专辑", [o.album.name]));
+		cont.appendChild(H.buildInfoRow("专辑", [en.name]));
 		eles[1].getElementsByClassName("main-title")[0].textContent = o.name;
-		en = await queryEntryP("artist", o.artist.id, o.artist.sid);
+		en = queryEntryIndex("artist", o.artist.id, o.artist.sid);
 		cont = eles[1].getElementsByClassName("main-user")[0];
 		H.removeChildren(cont);
-		cont.appendChild(H.buildElement("img", {src: en.logoURL}));
+		cont.appendChild(H.buildElement("img", {src: en.keywords[1].string}));
 		cont.appendChild(H.buildElement("span", null, en.name));
 		cont = eles[1].getElementsByClassName("main-infolist")[0];
 		H.removeChildren(cont);

@@ -34,7 +34,6 @@ function openDialog(n) {
 	} else {
 		ele = document.importNode(page.templates.dialog.firstElementChild, true);
 		dlg = ele.firstElementChild;
-		ele.classList.add("block-dynamic");
 		dlg.id = "dialog-" + n;
 	}
 	ele.classList.add("block-active");

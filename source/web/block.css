@@ -1,91 +1,107 @@
 .block-content {
+	display: block;
 	font-family: var(--font-sans);
 	font-weight: 400;
 }
 
-.block-content h1, .block-content h2, .block-content h3,
-.block-content p, .block-content blockquote, .block-content code,
-.block-content ul, block-content ol, .block-content dl, .block-content img,
-.block-content .block-block, .block-content .block-line {
+.block-content> h1, .block-content> h2, .block-content> h3,
+.block-content> p, .block-content> blockquote, .block-content> code,
+.block-content> ul, .block-content> ol, .block-content> dl, .block-content> img,
+.block-content> .block-block, .block-content> .block-line {
 	display: block;
 	margin: 15px 0;
 }
 .block-content> *:first-child { margin-top: 5px; }
 .block-content> *:last-child { margin-bottom: 5px; }
 
-.block-content h1 {
+.block-content> h1 {
 	font-size: 1.5em;
 	font-weight: 600;
 }
-.block-content h2 {
+.block-content> h2 {
 	font-size: 1.4em;
 	font-weight: 500;
 }
-.block-content h3 {
+.block-content> h3 {
 	font-size: 1.2em;
 	font-weight: 500;
 }
 
-.block-content p, .block-content blockquote {
+.block-content> p, .block-content> blockquote {
 	font-weight: 300;
 }
 
-.block-content blockquote, .block-content code {
+.block-content> blockquote, .block-content> code {
 	border-left: 5px solid #cccccc;
 	padding: 5px;
 	box-shadow: 2px 2px 5px #00000033;
 }
-.block-content code {
+.block-content> code {
 	border-left-color: #cc66ff;
 	font-family: var(--font-monospace);
 }
 
-.block-content ul, block-content ol {
+.block-content> ul, block-content> ol {
 	padding-left: 1.5em;
 }
-.block-content ul> li, block-content ol> li {
+.block-content> ul> li, block-content> ol> li {
 	display: list-item;
 }
 
-.block-content dl dt, .block-content dl dd {
+.block-content> dl dt, .block-content> dl dd {
 	display: block;
 }
-.block-content dl dt {
+.block-content> dl dt {
 	font-weight: 300;
 }
-.block-content dl dd {
+.block-content> dl dd {
 	margin: 0 0 5px 1.5em;
 }
 
-.block-content img {
+.block-content> img {
 	margin: 15px auto;
 	max-width: 100%;
 	max-height: 60vh;
 	border-radius: 2px;
 	background-color: #eeeeee;
 }
-.block-content p> img {
+.block-content> p img, .block-content> blockquote:not(.block-content) img,
+.block-content> ul img, .block-content> ol img, .block-content> dl img {
 	display: inline;
 	margin: 0 10px;
 	max-height: 120px;
+	background-color: #eeeeee;
 }
 
-.block-content q {
+.block-content> p a, .block-content> blockquote:not(.block-content) a,
+.block-content> ul a, .block-content> ol a, .block-content> dl a {
+	border-bottom: 1px solid #ff8866;
+	cursor: pointer;
+	transition: border-color 0.3s, color 0.3s;
+}
+.block-content> p a:hover, .block-content> blockquote:not(.block-content) a:hover,
+.block-content> ul a:hover, .block-content> ol a:hover, .block-content> dl a:hover {
+	border-color: #ff4411;
+	color: #ff4411;
+}
+
+.block-content> p q, .block-content> blockquote:not(.block-content) q,
+.block-content> ul q, .block-content> ol q, .block-content> dl q {
 	font-family: var(--font-monospace);
 }
 .block-content q::before, .block-content q::after { content: none; }
 
-.block-content .block-block {
+.block-content> .block-block {
 	position: relative;
 	z-index: 0;
 }
 
-.block-content .block-line {
+.block-content> .block-line {
 	display: flex;
 	align-items: center;
 }
 
-.block-content .block-line> input, .block-content .block-line> button {
+.block-content> .block-line> input, .block-content> .block-line> button {
 	align-self: stretch;
 	min-width: 40px;
 	min-height: 24px;
@@ -94,7 +110,7 @@
 	color: #f7f7f7;
 }
 
-.block-content .block-line> input[type="text"] {
+.block-content> .block-line> input[type="text"] {
 	flex-grow: 1;
 	border: 1px solid #cccccc;
 	padding: 0 5px;
@@ -105,13 +121,13 @@
 	color: #333333;
 }
 
-.block-content .block-line> input[type="file"] {
+.block-content> .block-line> input[type="file"] {
 	position: relative;
 	width: 40px;
 	font-size: 0;
 	cursor: pointer;
 }
-.block-content .block-line> input[type="file"]::before, .block-content .block-line> input[type="file"]::after {
+.block-content> .block-line> input[type="file"]::before, .block-content> .block-line> input[type="file"]::after {
 	position: absolute;
 	left: 0;
 	
@@ -119,12 +135,12 @@
 	
 	content: "";
 }
-.block-content .block-line> input[type="file"]::before {
+.block-content> .block-line> input[type="file"]::before {
 	top: 0;
 	height: 100%;
 	background-color: #ff4411;
 }
-.block-content .block-line> input[type="file"]::after {
+.block-content> .block-line> input[type="file"]::after {
 	top: 50%;
 	transform: translateY(-50%);
 	
@@ -134,7 +150,7 @@
 	text-align: center;
 }
 
-.block-content .block-line> button {
+.block-content> .block-line> button {
 	padding: 0 10px;
 	text-align: center;
 	cursor: pointer;

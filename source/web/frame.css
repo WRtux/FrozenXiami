@@ -34,10 +34,16 @@ body {
 	padding: 0 6%;
 }
 @media screen and (max-width: 800px) {
-	#nav, #main, #player { padding: 0 20px; }
+	#nav, #main, #player {
+		padding-left: 20px;
+		padding-right: 20px;
+	}
 }
 @media screen and (max-width: 540px) {
-	#player { padding: 0; }
+	#player {
+		padding-left: 0;
+		padding-right: 0;
+	}
 }
 
 #nav, #player {

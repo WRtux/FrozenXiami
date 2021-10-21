@@ -8,7 +8,7 @@
  <title>FrozenXiami</title>
  <link rel="stylesheet" href="web/frame.css" />
  <link rel="stylesheet" href="web/main.css" />
- <link rel="stylesheet" href="web/block.css" />
+ <link rel="stylesheet" href="web/content.css" />
  <link rel="stylesheet" href="web/mask.css" />
  <link rel="stylesheet" href="web/font/player.css" />
 </head>
@@ -87,7 +87,7 @@
 <article class="main-main block-content">
  <h2>未加载文件</h2>
  <p>加载 <span class="icon">⚫</span> 信息池文件以开始浏览。</p>
- <p>子版本：<q>20211017.0</q></p>
+ <p>子版本：<q>20211021.0</q></p>
 </article>
 
 </main>
@@ -127,7 +127,7 @@
  <div class="dialog-mask"><aside id="dialog-search" class="dialog block-content">
   <h2>快速搜索</h2><button class="dialog-close"></button>
   <p>根据关键词按默认排序进行即时搜索（最多显示 100 条结果）。<br />要进行自定义的搜索，请使用检索页。</p>
-  <div class="block-line">
+  <div class="content-line">
    <input type="text" placeholder="关键词" />
    <button id="dialog-search-search" class="icon">⚲</button>
   </div>
@@ -136,12 +136,12 @@
  <div class="dialog-mask"><aside id="dialog-file" class="dialog block-content">
   <h2>信息池文件</h2><button class="dialog-close"></button>
   <p>仅支持带索引的信息池（<q>*.ijsom</q>）。JSON 数据需进行索引条目操作。</p>
-  <div class="block-line">
+  <div class="content-line">
    <input type="text" disabled placeholder="--" />
    <input id="dialog-file-pool" type="file" />
   </div>
   <h2>用户文件</h2>
-  <div class="block-line">
+  <div class="content-line">
    <input type="text" disabled placeholder="--" />
    <input id="dialog-file-user" type="file" accept="application/json" />
   </div>

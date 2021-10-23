@@ -294,23 +294,26 @@
 	display: grid;
 	margin: var(--spacing) 0;
 	
-	justify-items: start;
-	grid-gap: var(--spacing);
-}
-.block-main> .main-flow-style {
 	justify-items: center;
+	grid-gap: 0 calc(var(--spacing) * 2 / 3);
+	grid-template-columns: repeat(auto-fill, minmax(calc(90px + 2vw), auto));
 }
-.block-main> .main-flow { grid-template-columns: repeat(auto-fill, minmax(120px, auto)); }
-.block-main> .main-flow-list { grid-template-columns: repeat(auto-fill, minmax(200px, auto)); }
-.block-main> .main-flow-style { grid-template-columns: repeat(auto-fill, minmax(180px, auto)); }
+.block-main> .main-flow-list, .block-main> .main-flow-style {
+	grid-template-columns: repeat(auto-fill, minmax(calc(150px + 6vw), auto));
+}
+
+.block-main> [class^="main-flow"].block-clamp {
+	grid-template-rows: repeat(2, auto);
+	grid-auto-rows: 0;
+	overflow: hidden;
+}
 
 .block-main> [class^="main-flow"]> figure {
+	margin: 0 0 var(--spacing) 0;
 	width: 100%;
 	cursor: pointer;
 	--spacing: 10px;
 }
-.block-main> .main-flow> figure { max-width: 170px; }
-.block-main> .main-flow-style> figure { max-width: 240px; }
 
 .block-main> .main-flow-list> figure {
 	padding: var(--spacing);
@@ -320,15 +323,21 @@
 .block-main> .main-flow> figure:hover { background-color: #eeeeee; }
 .block-main> .main-flow-list> figure:hover { background-color: #000000; }
 
-.block-main> [class^="main-flow"]> *> figcaption {
-	display: block;
-	margin: var(--spacing) 0;
-	font-weight: 600;
+@media screen and (max-width: 540px) {
+	.block-main> .main-flow, .block-main> .main-flow-list {
+		grid-template-columns: repeat(3, 1fr);
+	}
 }
-.block-main> [class^="main-flow"]> *> span {
-	display: block;
-	font-size: 90%;
-	color: #888888;
+@media screen and (min-width: 1440px) {
+	.block-main> [class^="main-flow"] {
+		grid-template-columns: repeat(auto-fill, minmax(calc(6vw + 30px), auto));
+	}
+	.block-main> .main-flow-list { grid-template-columns: repeat(auto-fill, minmax(calc(10vw + 90px), auto)); }
+	.block-main> .main-flow-style { grid-template-columns: repeat(auto-fill, minmax(calc(12vw + 60px), auto)); }
+	.block-main> .main-flow-style> figure {
+		margin-left: var(--spacing);
+		margin-right: var(--spacing);
+	}
 }
 
 [class^="main-flow"]> .block-main> [class^="main-cover"] {
@@ -344,6 +353,17 @@
 	margin-left: var(---);
 	margin-right: var(---);
 	padding-bottom: 60%;
+}
+
+[class^="main-flow"]> .block-main> figcaption.main-title {
+	font-size: 1.1em;
+	font-weight: 600;
+}
+
+[class^="main-flow"]> .block-main> .main-text {
+	display: block;
+	font-size: 90%;
+	color: #888888;
 }
 
 [class^="main-flow"]> .block-main> .main-user {

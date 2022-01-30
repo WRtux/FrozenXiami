@@ -1,43 +1,40 @@
 "use strict";
 
 var scene = {
-	current: "load", list: new Object(), helper: new Object()
+	main: null, current: "load", list: new Object(), helper: new Object()
 };
 
-scene.activateMenu = function (i, j) {
-	if (i != null) {
-		let ele = document.querySelector("#nav> .nav-item.block-active");
-		ele != null && ele.classList.remove("block-active");
-		ele = document.querySelectorAll("#nav> .nav-item")[i];
-		ele != null && ele.classList.add("block-active");
-	}
-	if (j != null) {
-		let cont = page.main.querySelector(".main-sidebar .main-menu");
-		if (cont != null) {
-			let ele = cont.getElementsByClassName("block-active")[0];
-			ele != null && ele.classList.remove("block-active");
-			ele = cont.children[j];
-			ele != null && ele.classList.add("block-active");
-		}
-	}
-};
-
-scene.switch = function (n) {
+scene.switch = function (n, o) {
 	let sce = this.list[n];
 	let dfrg = sce && sce.createMain(page.templates.main);
 	if (dfrg == null)
 		return null;
 	H.removeChildren(page.main);
 	page.main.appendChild(dfrg);
-	this.activateMenu(...sce.menuConfig);
 	this.current = n;
-	return dfrg;
+	page.selectMenu(...sce.menuConfig);
+	if (o != null)
+		this.display(o);
+	return page.main.childNodes;
 };
 
 scene.display = function (o) {
 	let sce = this.list[this.current];
-	return sce && H.filterFunction(sce.display) ?
-		Promise.resolve(sce.display(page.main.children, o)) : null;
+	if (sce == null || !H.filterFunction(sce.display))
+		return null;
+	async function displayP(o) {
+		this.main.classList.add("block-busy");
+		await H.sleepP(300);
+		let dfrg = document.createDocumentFragment();
+		for (let ele of Array.from(this.main.childNodes)) {
+			dfrg.appendChild(ele);
+		}
+		await sce.display(dfrg, o);
+		this.main.appendChild(dfrg);
+		this.main.classList.remove("block-busy");
+		return this.main.childNodes;
+	}
+	return displayP.call(this, o);
 };
 
 scene.list["home"] = {
@@ -89,20 +86,30 @@ scene.list["artist"] = {
 		dfrg.children[1].getElementsByClassName("main-user")[0].remove();
 		return dfrg;
 	},
-	display: async function (eles, o) {
-		o = (o.type == null) ? o : await inflateEntryP(o);
-		let cont = eles[0].getElementsByClassName("main-cover-artist")[0];
+	display: async function (dfrg, o) {
+		if (o instanceof Array)
+			o = await queryEntryP("artist", o[0], o[1]);
+//		o = (o.type == null) ? o : await inflateEntryP(o);
+		let cont = dfrg.querySelector("#main-listbar> .main-cover-artist");
 		H.removeChildren(cont);
 		cont.appendChild(H.buildElement("img", {src: o.logoURL}));
-		cont = eles[0].getElementsByClassName("block-content")[0];
-		cont.children[0].textContent = "艺人介绍";
-		cont.children[1].textContent = (o.info != null) ? o.info : "";
-		eles[1].getElementsByClassName("main-title")[0].textContent = o.name;
-		cont = eles[1].getElementsByClassName("main-infolist")[0];
+		cont = dfrg.querySelector("#main-listbar> .block-content");
 		H.removeChildren(cont);
-		o.gender && cont.appendChild(H.buildInfoRow("性别", [o.gender]));
-		o.birthday && cont.appendChild(H.buildInfoRow("生日", [o.birthday]));
-		o.area && cont.appendChild(H.buildInfoRow("地区", [o.area]));
+		if (o.info != null) {
+			cont.appendChild(H.buildElement("h3", null, "艺人介绍"));
+			cont.appendChild(H.buildElement("p", null, o.info));
+		} else {
+			cont.appendChild(H.buildElement("h3", null, "暂无介绍"));
+		}
+		dfrg.querySelector("#main-list> .main-title").textContent = (o.name != null ? o.name : "暂无名称");
+		cont = dfrg.querySelector("#main-list> .main-infolist");
+		H.removeChildren(cont);
+		if (typeof o.gender != "undefined")
+			cont.appendChild(H.buildInfoRow("性别", [o.gender]));
+		if (typeof o.birthday != "undefined")
+			cont.appendChild(H.buildInfoRow("生日", [o.birthday]));
+		if (typeof o.area != "undefined")
+			cont.appendChild(H.buildInfoRow("地区", [o.area]));
 	}
 };
 
@@ -115,29 +122,40 @@ scene.list["album"] = {
 		H.replaceChildrenClass(dfrg.children[0], "main-cover-list", "main-cover-album");
 		return dfrg;
 	},
-	display: async function (eles, o) {
-		o = (o.type == null) ? o : await inflateEntryP(o);
-		let cont = eles[0].getElementsByClassName("main-cover-album")[0];
+	display: async function (dfrg, o) {
+		if (o instanceof Array)
+			o = await queryEntryP("album", o[0], o[1]);
+//		o = (o.type == null) ? o : await inflateEntryP(o);
+		let cont = dfrg.querySelector("#main-listbar> .main-cover-album");
 		H.removeChildren(cont);
 		cont.appendChild(H.buildElement("img", {src: o.logoURL}));
 		cont.appendChild(H.buildElement("span", {class: "icon-play"}, o.playCount));
-		cont = eles[0].getElementsByClassName("block-content")[0];
-		cont.children[0].textContent = "专辑介绍";
-		cont.children[1].textContent = (o.info != null) ? o.info : "";
-		eles[1].getElementsByClassName("main-title")[0].textContent = o.name;
-		cont = eles[1].getElementsByClassName("main-user")[0];
+		cont = dfrg.querySelector("#main-listbar> .block-content");
+		H.removeChildren(cont);
+		if (o.info != null) {
+			cont.appendChild(H.buildElement("h3", null, "专辑介绍"));
+			cont.appendChild(H.buildElement("p", null, o.info));
+		} else {
+			cont.appendChild(H.buildElement("h3", null, "暂无介绍"));
+		}
+		dfrg.querySelector("#main-list> .main-title").textContent = (o.name != null ? o.name : "暂无名称");
+		cont = dfrg.querySelector("#main-list> .main-user");
 		H.removeChildren(cont);
 		for (let ren of o.artists != null ? o.artists : "") {
 			let en = queryEntryIndex("artist", ren.id, ren.sid);
 			cont.appendChild(H.buildElement("img", {src: en.keywords[1].string}));
-			cont.appendChild(H.buildElement("span", null, en.name));
+			cont.appendChild(H.buildElement("span", null, en.name != null ? en.name : "暂无名称"));
 		}
-		cont = eles[1].getElementsByClassName("main-infolist")[0];
+		cont = dfrg.querySelector("#main-list> .main-infolist");
 		H.removeChildren(cont);
-		o.discCount && cont.appendChild(H.buildInfoRow("碟片数", [o.discCount]));
-		o.songCount && cont.appendChild(H.buildInfoRow("曲目数", [o.songCount]));
-		o.publishTime && cont.appendChild(H.buildInfoRow("发行时间", [o.publishTime]));
-		o.language && cont.appendChild(H.buildInfoRow("语言", [o.language]));
+		if (typeof o.discCount != "undefined")
+			cont.appendChild(H.buildInfoRow("碟片数", [o.discCount]));
+		if (typeof o.songCount != "undefined")
+			cont.appendChild(H.buildInfoRow("曲目数", [o.songCount]));
+		if (typeof o.publishTime != "undefined")
+			cont.appendChild(H.buildInfoRow("发行时间", [o.publishTime]));
+		if (typeof o.language != "undefined")
+			cont.appendChild(H.buildInfoRow("语言", [o.language]));
 	}
 };
 
@@ -149,27 +167,35 @@ scene.list["song"] = {
 		dfrg.appendChild(document.importNode(tmpl.getElementById("main-song"), true));
 		return dfrg;
 	},
-	display: async function (eles, o) {
-		o = (o.type == null) ? o : await inflateEntryP(o);
+	display: async function (dfrg, o) {
+		if (o instanceof Array)
+			o = await queryEntryP("song", o[0], o[1]);
+//		o = (o.type == null) ? o : await inflateEntryP(o);
 		let en = queryEntryIndex("album", o.album.id, o.album.sid);
-		let cont = eles[0].getElementsByClassName("main-cover-song")[0];
+		let cont = dfrg.querySelector("#main-songbar> .main-cover-song");
 		H.removeChildren(cont);
 		cont.appendChild(H.buildElement("img", {src: en.keywords[1].string}));
 		cont.appendChild(H.buildElement("span", {class: "icon-play"}, o.playCount));
-		cont = eles[0].getElementsByClassName("main-infolist")[0];
+		cont = dfrg.querySelector("#main-songbar> .main-infolist");
 		H.removeChildren(cont);
-		cont.appendChild(H.buildInfoRow("专辑", [en.name]));
-		eles[1].getElementsByClassName("main-title")[0].textContent = o.name;
+		if (en != null && typeof en.name != "undefined")
+			cont.appendChild(H.buildInfoRow("专辑", [en.name]));
+		dfrg.querySelector("#main-song> .main-title").textContent = (o.name != null ? o.name : "暂无名称");
 		en = queryEntryIndex("artist", o.artist.id, o.artist.sid);
-		cont = eles[1].getElementsByClassName("main-user")[0];
+		cont = dfrg.querySelector("#main-song> .main-user");
 		H.removeChildren(cont);
-		cont.appendChild(H.buildElement("img", {src: en.keywords[1].string}));
-		cont.appendChild(H.buildElement("span", null, en.name));
-		cont = eles[1].getElementsByClassName("main-infolist")[0];
+		if (en != null) {
+			cont.appendChild(H.buildElement("img", {src: en.keywords[1].string}));
+			cont.appendChild(H.buildElement("span", null, en.name != null ? en.name : "暂无名称"));
+		}
+		cont = dfrg.querySelector("#main-song> .main-infolist");
 		H.removeChildren(cont);
-		o.translation && cont.appendChild(H.buildInfoRow("译名", [o.translation]));
-		o.disc && cont.appendChild(H.buildInfoRow("碟片 #", [o.disc]));
-		o.track && cont.appendChild(H.buildInfoRow("曲目 #", [o.track]));
+		if (typeof o.translation != "undefined")
+			cont.appendChild(H.buildInfoRow("译名", [o.translation]));
+		if (typeof o.disc != "undefined")
+			cont.appendChild(H.buildInfoRow("碟片 #", [o.disc]));
+		if (typeof o.track != "undefined")
+			cont.appendChild(H.buildInfoRow("曲目 #", [o.track]));
 	}
 };
 

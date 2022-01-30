@@ -1,6 +1,7 @@
 "use strict";
 
 var page = {
+	
 	main: document.getElementById("main"),
 	masks: {
 		toast: document.getElementById("mask-toast"),
@@ -10,7 +11,26 @@ var page = {
 		main: document.getElementById("main-template").content,
 		toast: document.getElementById("toast-template").content,
 		dialog: document.getElementById("dialog-template").content
+	},
+	
+	selectMenu(i, j) {
+		if (i != null) {
+			let ele = document.querySelector("#nav> .nav-item.block-active");
+			ele != null && ele.classList.remove("block-active");
+			ele = document.querySelectorAll("#nav> .nav-item")[i];
+			ele != null && ele.classList.add("block-active");
+		}
+		if (j != null) {
+			let cont = this.main.querySelector("#main> .main-sidebar .main-menu");
+			if (cont != null) {
+				let ele = cont.getElementsByClassName("block-active")[0];
+				ele != null && ele.classList.remove("block-active");
+				ele = cont.children[j];
+				ele != null && ele.classList.add("block-active");
+			}
+		}
 	}
+	
 };
 
 function toast(inf, t) {
@@ -65,7 +85,7 @@ function closeDialog(dlg) {
 	return dlg;
 }
 
-(function () {
+H.callOnReadyP(function (e) {
 	let eles = document.getElementsByTagName("template");
 	while (eles.length > 0) {
 		eles[0].remove();
@@ -75,7 +95,6 @@ function closeDialog(dlg) {
 	document.getElementById("dialog-file-pool").addEventListener("change", function (e) {
 		if (this.files.length != 1)
 			return;
-		alertDialog("不可用", "读取功能未被实现。"); return; // Remove if implemented
 		let f = this.files[0];
 		this.previousElementSibling.value = f.name;
 		let inf = "请稍等……";
@@ -93,6 +112,7 @@ function closeDialog(dlg) {
 			scene.switch("home");
 		}, (str) => { alertDialog("加载失败", str); });
 	});
+	scene.main = page.main;
 	if (navigator.userAgent.match(/\b(?:Mobile|[Aa]ndroid|iPhone|iPad)\b/))
 		toast("正在使用移动设备访问，加载可能会较缓慢或导致内存不足。", 3000);
-})();
+});

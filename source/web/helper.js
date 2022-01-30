@@ -22,10 +22,31 @@ var H = {
 	restP() {
 		return new Promise((resolve, reject) => { window.setTimeout(resolve, 0); });
 	},
+	sleepP(t) {
+		return new Promise((resolve, reject) => { window.setTimeout(resolve, t); });
+	},
+	callOnReadyP(func) {
+		return new Promise(function (resolve, reject) {
+			if (document.readyState != "loading") {
+				resolve(func(null));
+				return;
+			}
+			function callback(e) {
+				document.removeEventListener("DOMContentLoaded", callback);
+				try {
+					resolve(func(e));
+				} catch (err) {
+					reject(err);
+				}
+			}
+			document.addEventListener("DOMContentLoaded", callback);
+		});
+	},
 	buildElement(typ, attrs, txt) {
 		let ele = document.createElement(typ);
 		for (let n in attrs) {
-			ele.setAttribute(n, attrs[n]);
+			if (attrs[n] != null)
+				ele.setAttribute(n, attrs[n]);
 		}
 		if (txt != null)
 			ele.textContent = txt;
@@ -34,8 +55,12 @@ var H = {
 	buildInfoRow(tt, infs) {
 		let dfrg = document.createDocumentFragment();
 		dfrg.appendChild(this.buildElement("dt", null, tt));
-		for (let inf of infs != null ? infs : "") {
-			dfrg.appendChild(this.buildElement("dd", null, inf));
+		if (infs != null && !(infs.length == 1 && infs[0] == null)) {
+			for (let inf of infs) {
+				dfrg.appendChild(this.buildElement("dd", null, inf));
+			}
+		} else {
+			dfrg.appendChild(this.buildElement("dd", {class: "main-infolist-null"}, "无"));
 		}
 		return dfrg;
 	},

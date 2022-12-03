@@ -1,2 +1,9 @@
-/site/media/
-/site/web/logo.png
+# Node modules
+/node_modules/
+
+# Media with copyright issues
+/static/media/
+/static/web/logo.png
+
+# Build directory
+/build/

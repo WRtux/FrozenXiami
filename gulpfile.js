@@ -7,6 +7,7 @@ const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
 const gulpPostcss = require('gulp-postcss');
 const gulpUglify = require('gulp-uglify');
+const localembed = require('./localembed');
 const autoprefixer = require('autoprefixer');
 const cssnano = require('cssnano');
 
@@ -43,6 +44,7 @@ function makeStylesheet(mode) {
         pipeline.push(sourcemaps.init(options['sourcemaps-init']));
     if (mode !== 'dev')
         pipeline.push(transformStylesheet());
+    pipeline.push(localembed('stylesheets'));
     pipeline.push(rename({extname: '.min.css'}));
     if (mode === 'dev')
         pipeline.push(sourcemaps.write(options['sourcemaps-write']));
@@ -59,6 +61,7 @@ function makeScript(mode) {
         pipeline.push(sourcemaps.init(options['sourcemaps-init']));
     if (mode !== 'dev')
         pipeline.push(transformScript());
+    pipeline.push(localembed('scripts'));
     pipeline.push(rename({extname: '.min.js'}));
     if (mode === 'dev')
         pipeline.push(sourcemaps.write(options['sourcemaps-write']));
@@ -71,6 +74,8 @@ function makeSource(mode) {
     pipeline.push(gulpIf('*.js', makeScript(mode)));
     return composePipeline(pipeline);
 }
+
+// ========== Tasks ==========
 
 function clean(callback) {
     fs.rm('build', {recursive: true, force: true}, callback);

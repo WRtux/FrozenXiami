@@ -16,7 +16,31 @@ const options = {
     'sourcemaps-write': {},
     'autoprefixer': {},
     'cssnano': {preset: 'default'},
-    'uglify': {}
+    'uglify': {},
+    'localembed-stylesheet': [
+        {
+            type: 'stylesheet',
+            sources: ['web/main.css', 'web/mask.css', 'web/content.css'],
+            target: 'web/main.css'
+        }
+    ],
+    'localembed-script': [
+        {
+            type: 'worker',
+            name: 'decoder',
+            sources: ['web/decoder.worker.js'],
+            target: 'web/load.worker.js'
+        }, {
+            type: 'worker',
+            name: 'loader',
+            sources: ['web/loader.worker.js'],
+            target: 'web/data.js'
+        }, {
+            type: 'bundle',
+            sources: ['web/page.js', 'web/scene.js'],
+            target: 'web/main.js'
+        }
+    ]
 };
 
 // NOP transform.
@@ -31,6 +55,8 @@ function composePipeline(pipeline) {
     return stream.compose(identity(), ...pipeline, identity() /* through2 polyfill */);
 }
 
+// ========== Actions ==========
+
 function transformStylesheet() {
     return gulpPostcss([
         autoprefixer(options['autoprefixer']),
@@ -44,7 +70,7 @@ function makeStylesheet(mode) {
         pipeline.push(sourcemaps.init(options['sourcemaps-init']));
     if (mode !== 'dev')
         pipeline.push(transformStylesheet());
-    pipeline.push(localembed('stylesheets'));
+    pipeline.push(localembed(options['localembed-stylesheet']));
     pipeline.push(rename({extname: '.min.css'}));
     if (mode === 'dev')
         pipeline.push(sourcemaps.write(options['sourcemaps-write']));
@@ -61,7 +87,7 @@ function makeScript(mode) {
         pipeline.push(sourcemaps.init(options['sourcemaps-init']));
     if (mode !== 'dev')
         pipeline.push(transformScript());
-    pipeline.push(localembed('scripts'));
+    pipeline.push(localembed(options['localembed-script']));
     pipeline.push(rename({extname: '.min.js'}));
     if (mode === 'dev')
         pipeline.push(sourcemaps.write(options['sourcemaps-write']));

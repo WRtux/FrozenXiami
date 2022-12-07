@@ -3,7 +3,7 @@
 var data = {
 	pool: {file: null, indices: null, cache: null},
 	user: null,
-	workers: {loadURL: "worker-load.js", searchURL: "worker-search.js", progress: null}
+	workers: {loadURL: "web/worker-load.js", searchURL: "web/worker-search.js", progress: null}
 };
 
 async function loadPoolIndicesP(f) {
@@ -16,7 +16,7 @@ async function loadPoolIndicesP(f) {
 	}
 	data.workers.progress = "加载索引……";
 	let notify = null, notifyError = null;
-	let wkr = new Worker(data.workers.loadURL);
+	let wkr = new Worker(/* data.workers.loadURL */ URL.local['loader']);
 	let buf = new Array();
 	wkr.addEventListener("message", function (e) {
 		let msg = e.data;

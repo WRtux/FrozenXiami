@@ -1,7 +1,8 @@
-"use strict";
-/* This file is just a template.
- * Implement it to load the index file.
+/* This file has no copyright assigned and is placed in the Public Domain.
+ *
+ * This file is a template. Implementation is needed to load index files.
  */
+"use strict";
 
 function readEntryIndex(typ, dat, off) {
 	let vw = new DataView(dat), dec = new TextDecoder();

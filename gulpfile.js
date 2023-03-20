@@ -1,22 +1,35 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 'use strict';
 const fs = require('node:fs');
-const stream = require('node:stream');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
-const rename = require('gulp-rename');
-const sourcemaps = require('gulp-sourcemaps');
+const gulpRename = require('gulp-rename');
+const helper = require('./tools/helper');
 const gulpPostcss = require('gulp-postcss');
 const gulpUglify = require('gulp-uglify');
-const localembed = require('./localembed');
+const gulpLocalembed = require('./tools/localembed');
 const autoprefixer = require('autoprefixer');
 const cssnano = require('cssnano');
 
+// ========== Options ==========
+
 const options = {
-    'sourcemaps-init': {},
-    'sourcemaps-write': {},
-    'autoprefixer': {},
-    'cssnano': {preset: 'default'},
-    'uglify': {},
+    sourceDir: './source',
+    staticDir: './static',
+    buildDir: './build',
+    'autoprefixer': {
+    },
+    'cssnano': {
+        preset: 'default'
+    },
+    'uglify': {
+        module: false,
+        compress: {}
+    },
     'localembed-stylesheet': [
         {
             type: 'stylesheet',
@@ -43,78 +56,66 @@ const options = {
     ]
 };
 
-// NOP transform.
-function identity() {
-    return new stream.Transform({
-        objectMode: true,
-        transform: (chunk, enc, callback) => callback(null, chunk)
-    });
-}
-
-function composePipeline(pipeline) {
-    return stream.compose(identity(), ...pipeline, identity() /* through2 polyfill */);
-}
-
 // ========== Actions ==========
 
-function transformStylesheet() {
+function buildOptimizeStylesheet() {
     return gulpPostcss([
         autoprefixer(options['autoprefixer']),
         cssnano(options['cssnano'])
     ]);
 }
 
-function makeStylesheet(mode) {
+function buildMakeStylesheet(mode) {
     let pipeline = [];
-    if (mode === 'dev')
-        pipeline.push(sourcemaps.init(options['sourcemaps-init']));
-    if (mode !== 'dev')
-        pipeline.push(transformStylesheet());
-    pipeline.push(localembed(options['localembed-stylesheet']));
-    pipeline.push(rename({extname: '.min.css'}));
-    if (mode === 'dev')
-        pipeline.push(sourcemaps.write(options['sourcemaps-write']));
-    return composePipeline(pipeline);
+    pipeline.push(
+        helper.buildInitSourceMap());
+    mode !== 'dev' && pipeline.push(
+        buildOptimizeStylesheet());
+    pipeline.push(
+        gulpLocalembed(options['localembed-stylesheet'], {mode, targetDir: options.buildDir}));
+    pipeline.push(gulpIf('*.css',
+        gulpRename({extname: '.min.css'})));
+    return helper.composePipeline(pipeline);
 }
 
-function transformScript() {
+function buildOptimizeScript() {
     return gulpUglify(options['uglify']);
 }
 
-function makeScript(mode) {
+function buildMakeScript(mode) {
     let pipeline = [];
-    if (mode === 'dev')
-        pipeline.push(sourcemaps.init(options['sourcemaps-init']));
-    if (mode !== 'dev')
-        pipeline.push(transformScript());
-    pipeline.push(localembed(options['localembed-script']));
-    pipeline.push(rename({extname: '.min.js'}));
-    if (mode === 'dev')
-        pipeline.push(sourcemaps.write(options['sourcemaps-write']));
-    return composePipeline(pipeline);
+    pipeline.push(
+        helper.buildInitSourceMap());
+    mode !== 'dev' && pipeline.push(
+        buildOptimizeScript());
+    pipeline.push(
+        gulpLocalembed(options['localembed-script'], {mode, targetDir: options.buildDir}));
+    pipeline.push(gulpIf('*.js',
+        gulpRename({extname: '.min.js'})));
+    return helper.composePipeline(pipeline);
 }
 
-function makeSource(mode) {
+function buildMakeSource(mode) {
     let pipeline = [];
-    pipeline.push(gulpIf('*.css', makeStylesheet(mode)));
-    pipeline.push(gulpIf('*.js', makeScript(mode)));
-    return composePipeline(pipeline);
+    pipeline.push(gulpIf('*.css', buildMakeStylesheet(mode)));
+    pipeline.push(gulpIf('*.js', buildMakeScript(mode)));
+    return helper.composePipeline(pipeline);
 }
 
 // ========== Tasks ==========
 
 function clean(callback) {
-    fs.rm('build', {recursive: true, force: true}, callback);
+    fs.rm(options.buildDir, {recursive: true, force: true}, callback);
 }
 
 function buildSource(mode) {
-    return gulp.src('source/**')
-        .pipe(makeSource(mode))
-        .pipe(gulp.dest('build'));
+    return gulp.src(`${options.sourceDir}/**`, {nodir: true})
+        .pipe(buildMakeSource(mode))
+        .pipe(gulp.dest(`${options.buildDir}/`));
 }
 
 function copyStatic(callback) {
-    fs.cp('static/', 'build/', {recursive: true}, callback);
+    fs.cp(`${options.staticDir}/`, `${options.buildDir}/`, {recursive: true}, callback);
 }
 
 module.exports = {

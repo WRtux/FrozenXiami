@@ -13,18 +13,19 @@ const vinylSourcemap = require('vinyl-sourcemap');
 function buildIdentity() {
     return new stream.Transform({
         objectMode: true,
-        transform: (chunk, enc, callback) => callback(null, chunk)
+        transform: (chunk, _enc, callback) => callback(null, chunk)
     });
 }
 
 function composePipeline(pipeline) {
-    return stream.compose(buildIdentity(), ...pipeline, buildIdentity() /* through2 polyfill */);
+    // through2 polyfill. See <https://github.com/rvagg/through2/issues/114>.
+    return stream.compose(buildIdentity(), ...pipeline, buildIdentity());
 }
 
 function buildInitSourceMap() {
     return new stream.Transform({
         objectMode: true,
-        transform(f, enc, callback) {
+        transform(f, _enc, callback) {
             if (!Vinyl.isVinyl(f))
                 return callback(new TypeError());
             if (f.isDirectory() || f.isNull())
@@ -37,14 +38,14 @@ function buildInitSourceMap() {
 function buildEmbedSourceMap() {
     return new stream.Transform({
         objectMode: true,
-        transform(f, enc, callback) {
+        transform(f, _enc, callback) {
             if (!Vinyl.isVinyl(f))
                 return callback(new TypeError());
             if (f.isDirectory() || f.isNull() || f.sourceMap == null)
                 return callback(null, f);
             f.sourceMap.file = f.basename;
             f.sourceMap.sourceRoot = path.relative(f.dirname, f.base).replaceAll(path.sep, '/');
-            vinylSourcemap.write(f, null, (err, f, map) => callback(err, f));
+            vinylSourcemap.write(f, null, (err, f, _map) => callback(err, f));
         }
     });
 }

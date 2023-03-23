@@ -15,7 +15,7 @@ const gulpLocalembed = require('./tools/localembed');
 const autoprefixer = require('autoprefixer');
 const cssnano = require('cssnano');
 
-// ========== Options ==========
+/* ========== Options ========== */
 
 const options = {
     sourceDir: './source',
@@ -56,14 +56,7 @@ const options = {
     ]
 };
 
-// ========== Actions ==========
-
-function buildOptimizeStylesheet() {
-    return gulpPostcss([
-        autoprefixer(options['autoprefixer']),
-        cssnano(options['cssnano'])
-    ]);
-}
+/* ========== Actions ========== */
 
 function buildMakeStylesheet(mode) {
     let pipeline = [];
@@ -78,8 +71,11 @@ function buildMakeStylesheet(mode) {
     return helper.composePipeline(pipeline);
 }
 
-function buildOptimizeScript() {
-    return gulpUglify(options['uglify']);
+function buildOptimizeStylesheet() {
+    return gulpPostcss([
+        autoprefixer(options['autoprefixer']),
+        cssnano(options['cssnano'])
+    ]);
 }
 
 function buildMakeScript(mode) {
@@ -95,6 +91,10 @@ function buildMakeScript(mode) {
     return helper.composePipeline(pipeline);
 }
 
+function buildOptimizeScript() {
+    return gulpUglify(options['uglify']);
+}
+
 function buildMakeSource(mode) {
     let pipeline = [];
     pipeline.push(gulpIf('*.css', buildMakeStylesheet(mode)));
@@ -102,24 +102,26 @@ function buildMakeSource(mode) {
     return helper.composePipeline(pipeline);
 }
 
-// ========== Tasks ==========
+/* ========== Tasks ========== */
 
-function clean(callback) {
-    fs.rm(options.buildDir, {recursive: true, force: true}, callback);
-}
-
-function buildSource(mode) {
-    return gulp.src(`${options.sourceDir}/**`, {nodir: true})
-        .pipe(buildMakeSource(mode))
-        .pipe(gulp.dest(`${options.buildDir}/`));
-}
-
-function copyStatic(callback) {
-    fs.cp(`${options.staticDir}/`, `${options.buildDir}/`, {recursive: true}, callback);
-}
-
-module.exports = {
-    'clean': clean,
-    'build-dev': gulp.series(clean, buildSource.bind(null, 'dev'), copyStatic),
-    'build-site': gulp.series(clean, buildSource.bind(null, 'site'), copyStatic)
+const tasks = {
+    'clean': (callback) => {
+        fs.rm(options.buildDir, {recursive: true, force: true}, callback);
+    },
+    'make-source': (mode = 'default') => {
+        return gulp.src(`${options.sourceDir}/**`, {nodir: true})
+            .pipe(buildMakeSource(mode))
+            .pipe(gulp.dest(`${options.buildDir}/`));
+    },
+    'make-source-dev': () => tasks['make-source']('dev'),
+    'make-source-site': () => tasks['make-source']('site'),
+    'make-static': (callback) => {
+        fs.cp(`${options.staticDir}/`, `${options.buildDir}/`, {recursive: true}, callback);
+    }
 };
+
+tasks['build'] = gulp.series(tasks['clean'], tasks['make-source'], tasks['make-static']);
+tasks['build-dev'] = gulp.series(tasks['clean'], tasks['make-source-dev'], tasks['make-static']);
+tasks['build-site'] = gulp.series(tasks['clean'], tasks['make-source-site'], tasks['make-static']);
+
+module.exports = tasks;

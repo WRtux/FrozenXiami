@@ -11,56 +11,7 @@ const vinylMatch = require('gulp-match');
 const vinylSourcemap = require('vinyl-sourcemap');
 const Concat = require('concat-with-sourcemaps');
 
-const handlers = {
-    'stylesheet': undefined,
-    'bundle': (op, files, opts) => {
-        let matches = files.filter((f) => op.sources.some((src) => matchPath(f, src, true)));
-        if (matches.length === 0)
-            return files;
-        files = files.filter((f) => !matches.includes(f));
-        let concat = new Concat(true, path.basename(op.target));
-        for (let f of matches) {
-            concat.add(f.basename, f.contents, f.sourceMap);
-        }
-        files.push(new Vinyl({
-            base: matches[0].base,
-            path: path.resolve(matches[0].base, op.target),
-            contents: concat.content,
-            sourceMap: JSON.parse(concat.sourceMap)
-        }));
-        return files;
-    },
-    'worker': (op, files, opts) => {
-        let target = files.find((f) => matchPath(f, op.target));
-        let matches = files.filter((f) => op.sources.some((src) => matchPath(f, src, true)));
-        if (target == null || matches.length === 0)
-           return files;
-        files = files.filter((f) => f === target || !matches.includes(f));
-        let concat = new Concat(true, path.basename(op.target));
-        let name = op.name ?? path.basename(path.basename(op.sources[0], '.js'), '.worker');
-        concat.add(null, `(URL.local??={})[${JSON.stringify(name)}]=URL.createObjectURL(new Blob([`);
-        for (let f of matches) {
-            if (opts.embedSourceMap && f.sourceMap != null)
-                attachSourceMap(f, opts.targetDir);
-            concat.add(null, JSON.stringify(f.contents.toString()) + ',');
-        }
-        concat.add(null, ']));');
-        concat.add(target.basename, target.contents, target.sourceMap);
-        target.contents = concat.content;
-        target.sourceMap = JSON.parse(concat.sourceMap);
-        return files;
-    },
-    'migrate': (op, files, opts) => {
-        let matches = files.filter((f) => op.sources.some((src) => matchPath(f, src, true)));
-        for (let f of matches) {
-            f.dirname = path.resolve(f.base, op.target);
-        }
-        return files;
-    }
-};
-handlers['stylesheet'] = handlers['bundle'];
-
-// ========== Internal Functions ==========
+/* ========== Internal Functions ========== */
 
 // Check if a Vinyl matches the specified path.
 function matchPath(file, match, glob = false) {
@@ -77,13 +28,71 @@ function attachSourceMap(file, targetDir, embed = true) {
     file.sourceMap.sourceRoot = path.relative(dir, file.base).replaceAll(path.sep, '/');
     !embed && delete file.sourceMap.sourcesContent;
     let mapfile = null;
-    vinylSourcemap.write(file, embed ? null : '.', (err, f, mapf) => {
+    vinylSourcemap.write(file, embed ? null : '.', (err, _f, mapf) => {
         if (err != null)
             throw err;
         mapfile = mapf;
     });
     return mapfile;
 }
+
+/* ========== Handlers ========== */
+
+function handleMerge(op, files, _opts) {
+    let matches = files.filter((f) => op.sources.some((src) => matchPath(f, src, true)));
+    if (matches.length === 0)
+        return files;
+    files = files.filter((f) => !matches.includes(f));
+    let concat = new Concat(true, path.basename(op.target));
+    for (let f of matches) {
+        concat.add(f.basename, f.contents, f.sourceMap);
+    }
+    files.push(new Vinyl({
+        base: matches[0].base,
+        path: path.resolve(matches[0].base, op.target),
+        contents: concat.content,
+        sourceMap: JSON.parse(concat.sourceMap)
+    }));
+    return files;
+}
+
+function handleMigrate(op, files, _opts) {
+    let matches = files.filter((f) => op.sources.some((src) => matchPath(f, src, true)));
+    for (let f of matches) {
+        f.dirname = path.resolve(f.base, op.target);
+    }
+    return files;
+}
+
+function handleEmbedWorker(op, files, opts) {
+    let target = files.find((f) => matchPath(f, op.target));
+    let matches = files.filter((f) => op.sources.some((src) => matchPath(f, src, true)));
+    if (target == null || matches.length === 0)
+       return files;
+    files = files.filter((f) => f === target || !matches.includes(f));
+    let concat = new Concat(true, path.basename(op.target));
+    let name = op.name ?? path.basename(path.basename(op.sources[0], '.js'), '.worker');
+    concat.add(null, `(URL.local??={})[${JSON.stringify(name)}]=URL.createObjectURL(new Blob([`);
+    for (let f of matches) {
+        if (opts.embedSourceMap && f.sourceMap != null)
+            attachSourceMap(f, opts.targetDir);
+        concat.add(null, JSON.stringify(f.contents.toString()) + ',');
+    }
+    concat.add(null, ']));');
+    concat.add(target.basename, target.contents, target.sourceMap);
+    target.contents = concat.content;
+    target.sourceMap = JSON.parse(concat.sourceMap);
+    return files;
+}
+
+const handlers = {
+    'stylesheet': handleMerge,
+    'bundle': handleMerge,
+    'worker': handleEmbedWorker,
+    'migrate': handleMigrate
+};
+
+/* ========== Exports ========== */
 
 function transform(ops, opts) {
     opts ??= {};
@@ -99,7 +108,7 @@ function transform(ops, opts) {
     let files = [];
     return new stream.Transform({
         objectMode: true,
-        transform(f, enc, callback) {
+        transform(f, _enc, callback) {
             if (!Vinyl.isVinyl(f))
                 return callback(new TypeError());
             if (f.isDirectory())
@@ -124,6 +133,6 @@ function transform(ops, opts) {
             return callback();
         }
     });
-};
+}
 
 module.exports = transform;

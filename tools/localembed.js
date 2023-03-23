@@ -6,6 +6,7 @@
 'use strict';
 const path = require('node:path');
 const stream = require('node:stream');
+const globParent = require('glob-parent');
 const Vinyl = require('vinyl');
 const vinylMatch = require('gulp-match');
 const vinylSourcemap = require('vinyl-sourcemap');
@@ -57,9 +58,13 @@ function handleMerge(op, files, _opts) {
 }
 
 function handleMigrate(op, files, _opts) {
-    let matches = files.filter((f) => op.sources.some((src) => matchPath(f, src, true)));
-    for (let f of matches) {
-        f.dirname = path.resolve(f.base, op.target);
+    for (let f of files) {
+        for (let src of op.sources) {
+            if (!matchPath(f, src, true))
+                continue;
+            f.path = path.resolve(f.base, op.target, path.relative(globParent(src), f.relative));
+            break;
+        }
     }
     return files;
 }
@@ -125,8 +130,7 @@ function transform(ops, opts) {
             for (let f of files) {
                 if (f.sourceMap != null) {
                     let mapfile = attachSourceMap(f, opts.targetDir, opts.embedSourceMap);
-                    if (mapfile != null)
-                        this.push(mapfile);
+                    mapfile != null && this.push(mapfile);
                 }
                 this.push(f);
             }

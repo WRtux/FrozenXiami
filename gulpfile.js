@@ -33,25 +33,41 @@ const options = {
     'localembed-stylesheet': [
         {
             type: 'stylesheet',
-            sources: ['web/main.css', 'web/mask.css', 'web/content.css'],
-            target: 'web/main.css'
+            sources: [
+                'styles/main.css',
+                'styles/content.css',
+                'styles/toolbar-*.css',
+                'styles/overlay-*.css'
+            ],
+            target: 'styles/main.css'
+        }, {
+            type: 'migrate',
+            sources: ['styles/**/*.css'],
+            target: 'web/'
         }
     ],
     'localembed-script': [
         {
             type: 'worker',
             name: 'decoder',
-            sources: ['web/decoder.worker.js'],
-            target: 'web/load.worker.js'
+            sources: ['scripts/decoder.worker.js'],
+            target: 'scripts/loader.worker.js'
         }, {
             type: 'worker',
             name: 'loader',
-            sources: ['web/loader.worker.js'],
-            target: 'web/data.js'
+            sources: ['scripts/loader.worker.js'],
+            target: 'scripts/data.js'
         }, {
             type: 'bundle',
-            sources: ['web/page.js', 'web/scene.js'],
-            target: 'web/main.js'
+            sources: [
+                'scripts/page.js',
+                'scripts/scene.js'
+            ],
+            target: 'scripts/main.js'
+        }, {
+            type: 'migrate',
+            sources: ['scripts/**/*.js'],
+            target: 'web/'
         }
     ]
 };

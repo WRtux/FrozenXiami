@@ -1,16 +1,16 @@
 {
   "name": "frozen-xiami",
   "version": "0.3.0-alpha.1",
-  "private": true,
   "homepage": "https://github.com/WRtux/FrozenXiami#readme",
-  "license": "MPL-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/WRtux/FrozenXiami.git"
   },
+  "license": "MPL-2.0",
+  "private": true,
   "scripts": {
     "clean": "gulp clean",
-    "build": "gulp build-site"
+    "build": "gulp build"
   },
   "devDependencies": {
     "gulp": "^4.0",

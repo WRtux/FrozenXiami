@@ -39,20 +39,18 @@ function attachSourceMap(file, targetDir, embed = true) {
 
 /* ========== Handlers ========== */
 
-function handleMerge(op, files, _opts) {
+function handleMerge(op, files, opts) {
     let matches = files.filter((f) => op.sources.some((src) => matchPath(f, src, true)));
     if (matches.length === 0)
         return files;
     files = files.filter((f) => !matches.includes(f));
-    let concat = new Concat(true, path.basename(op.target));
-    for (let f of matches) {
-        concat.add(f.basename, f.contents, f.sourceMap);
-    }
+    let concat = new Concat(opts.keepSourceMap, path.basename(op.target));
+    matches.forEach((f) => concat.add(f.basename, f.contents, f.sourceMap));
     files.push(new Vinyl({
         base: matches[0].base,
         path: path.resolve(matches[0].base, op.target),
         contents: concat.content,
-        sourceMap: JSON.parse(concat.sourceMap)
+        sourceMap: opts.keepSourceMap ? JSON.parse(concat.sourceMap) : null
     }));
     return files;
 }
@@ -75,9 +73,12 @@ function handleEmbedWorker(op, files, opts) {
     if (target == null || matches.length === 0)
        return files;
     files = files.filter((f) => f === target || !matches.includes(f));
-    let concat = new Concat(true, path.basename(op.target));
-    let name = op.name ?? path.basename(path.basename(op.sources[0], '.js'), '.worker');
-    concat.add(null, `(URL.local??={})[${JSON.stringify(name)}]=URL.createObjectURL(new Blob([`);
+    let concat = new Concat(opts.keepSourceMap, path.basename(op.target));
+    let name = op.name ?? path.basename(path.basename(matches[0].basename, '.js'), '.worker');
+    // Temporarily expanded as `??=` operator is not supported on some targets.
+    concat.add(null,
+        `(URL.local=URL.local??{})[${JSON.stringify(name)}]=` +
+        `URL.createObjectURL(new Blob([`);
     for (let f of matches) {
         if (opts.embedSourceMap && f.sourceMap != null)
             attachSourceMap(f, opts.targetDir);
@@ -86,7 +87,7 @@ function handleEmbedWorker(op, files, opts) {
     concat.add(null, ']));');
     concat.add(target.basename, target.contents, target.sourceMap);
     target.contents = concat.content;
-    target.sourceMap = JSON.parse(concat.sourceMap);
+    target.sourceMap = opts.keepSourceMap ? JSON.parse(concat.sourceMap) : null;
     return files;
 }
 
@@ -109,6 +110,7 @@ function transform(ops, opts) {
     }
     if (opts.targetDir != null && typeof opts.targetDir !== 'string')
         throw new TypeError();
+    opts.keepSourceMap = (opts.mode !== 'site');
     opts.embedSourceMap = (opts.mode === 'dev');
     let files = [];
     return new stream.Transform({
@@ -128,7 +130,7 @@ function transform(ops, opts) {
                 files = handlers[op.type](op, files, opts);
             }
             for (let f of files) {
-                if (f.sourceMap != null) {
+                if (opts.keepSourceMap && f.sourceMap != null) {
                     let mapfile = attachSourceMap(f, opts.targetDir, opts.embedSourceMap);
                     mapfile != null && this.push(mapfile);
                 }

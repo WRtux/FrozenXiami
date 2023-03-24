@@ -76,14 +76,14 @@ const options = {
 
 function buildMakeStylesheet(mode) {
     let pipeline = [];
-    pipeline.push(
+    mode !== 'site' && pipeline.push(
         helper.buildInitSourceMap());
     mode !== 'dev' && pipeline.push(
         buildOptimizeStylesheet());
     pipeline.push(
         gulpLocalembed(options['localembed-stylesheet'], {mode, targetDir: options.buildDir}));
-    pipeline.push(gulpIf('*.css',
-        gulpRename({extname: '.min.css'})));
+//  pipeline.push(gulpIf('*.css',
+//      gulpRename({suffix: '.min'})));
     return helper.composePipeline(pipeline);
 }
 
@@ -96,14 +96,14 @@ function buildOptimizeStylesheet() {
 
 function buildMakeScript(mode) {
     let pipeline = [];
-    pipeline.push(
+    mode !== 'site' && pipeline.push(
         helper.buildInitSourceMap());
     mode !== 'dev' && pipeline.push(
         buildOptimizeScript());
     pipeline.push(
         gulpLocalembed(options['localembed-script'], {mode, targetDir: options.buildDir}));
-    pipeline.push(gulpIf('*.js',
-        gulpRename({extname: '.min.js'})));
+//  pipeline.push(gulpIf('*.js',
+//      gulpRename({suffix: '.min'})));
     return helper.composePipeline(pipeline);
 }
 
@@ -129,6 +129,7 @@ const tasks = {
             .pipe(buildMakeSource(mode))
             .pipe(gulp.dest(`${options.buildDir}/`));
     },
+    'make-source-default': () => tasks['make-source'](),
     'make-source-dev': () => tasks['make-source']('dev'),
     'make-source-site': () => tasks['make-source']('site'),
     'make-static': (callback) => {
@@ -137,6 +138,7 @@ const tasks = {
 };
 
 tasks['build'] = gulp.series(tasks['clean'], tasks['make-source'], tasks['make-static']);
+tasks['build-default'] = tasks['build'];
 tasks['build-dev'] = gulp.series(tasks['clean'], tasks['make-source-dev'], tasks['make-static']);
 tasks['build-site'] = gulp.series(tasks['clean'], tasks['make-source-site'], tasks['make-static']);
 

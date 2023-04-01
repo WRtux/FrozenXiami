@@ -10,6 +10,183 @@ var data = {
 	workers: {loadURL: "web/worker-load.js", searchURL: "web/worker-search.js", progress: null}
 };
 
+class DataPool {
+	index = new DataPoolIndex();
+	dataBlobs = [];
+	_cache = new WeakMap();
+}
+
+class DataPoolIndex {
+	artistMap = new Map();
+	albumMap  = new Map();
+	songMap   = new Map();
+	miscMap   = new Map();
+}
+
+// TODO: Adjust event assigning
+class DataPoolLoader extends H.Messenger {
+
+	_readConcurrency = 1;
+	_loadConcurrency = 4;
+
+	async _scanHeaderAndBlocks(f) {
+		const HEADER_SIZE = 6, BLOCK_SIZE = 12;
+		let off = 0;
+		let vw, dat;
+
+		if (f.size <= HEADER_SIZE)
+			throw new Error('Invalid file.');
+		vw = await H.fileReadToDataView(f, off, off += HEADER_SIZE);
+		dat = {
+			identifier: vw.getUint32(0),
+			version: vw.getUint16(4)
+		};
+		if (dat.identifier !== 0xDEAD4453)
+			throw new Error(`Incorrect file identifier: ${H.formatHexadec(dat.identifier, 8)}`);
+		if (dat.version !== 0x0100)
+			throw new Error(`Unsupported format version: ${H.formatHexadec(dat.version, 4)}}`);
+
+		this._postMessage(['info', 'Iterating blocks...']);
+		let blks = [];
+		while (true) {
+			if (off + BLOCK_SIZE > f.size)
+				throw new Error('Incorrect file size.');
+			vw = await H.fileReadToDataView(f, off, off += BLOCK_SIZE);
+			dat = {
+				identifier: vw.getUint32(0),
+				size: vw.getUint32(4) * 2 ** 32 + vw.getUint32(8)
+			};
+			if (dat.size >= 0x1_0000_0000_0000)
+				throw new Error('Corrupt block info.');
+			if (off + dat.size > f.size)
+				throw new Error('Incorrect file size.');
+			let blk = {
+				identifier: dat.identifier, type: undefined,
+				blob: H.fileSlice(f, off, off += dat.size)
+			};
+			blk.type = (
+				dat.identifier === 0x00000100 ? 'end' :
+				dat.identifier === 0x584D0001 ? 'xiami-data-main' :
+				dat.identifier === 0x584D1001 ? 'xiami-index-main' :
+				dat.identifier === 0x584D1201 ? 'xiami-index-stringpool' : 'unknown'
+			);
+			if (blk.type === 'unknown')
+				this._postMessage(['warning', `Unknown block detected: ${H.formatHexadec(dat.identifier, 8)}`]);
+			blks.push(blk);
+			if (blk.type === 'end')
+				break;
+		}
+		return blks;
+	}
+
+	async _readIndex(blks) {
+		let bufIdx = {segments: [], stringPools: []};
+		let tskCnt = 0, tskPool = new Map();
+		let aborter = new AbortController(), signal = aborter.signal;
+		for (let blk of blks) {
+			let tsk;
+			switch (blk.type) {
+			 case 'xiami-index-main':
+				tsk = H.fileReadArrayBuffer(blk.blob, null, null, signal)
+					.then((buf) => void bufIdx.segments.push(buf));
+				break;
+			 case 'xiami-index-stringpool':
+				tsk = H.fileReadString(blk.blob, null, null, 'UTF-16LE', signal)
+					.then((str) => void bufIdx.stringPools.push(str));
+				break;
+			 default:
+				continue;
+			}
+			let id = tskCnt++;
+			tsk = tsk.finally(() => tskPool.delete(id));
+			tsk = tsk.catch((err) => {
+				aborter.abort();
+				throw err;
+			});
+			tskPool.set(id, tsk);
+			if (tskPool.size >= this._readConcurrency)
+				await Promise.race(tskPool.values());
+		}
+		await Promise.all(tskPool.values());
+		return bufIdx;
+	}
+
+	async _loadIndex(bufIdx) {
+		let idxRecs = [];
+		let tskCnt = 0, tskPool = new Map();
+		let aborter = new AbortController(), signal = aborter.signal;
+		for (let seg of bufIdx.segments) {
+			let wkr = H.workerBuildAbortable(URL.local['loader'], signal);
+			wkr.postMessage(['data', seg], [seg]);
+			let tsk = H.eventResolveMap(wkr, {
+				'message': ({data: msg}) => {
+					switch (msg[0]) {
+					 case 'progress':
+						msg[1].forEach((en) => idxRecs.push(en));
+						this._postMessage(['progress', idxRecs.length]);
+						return false;
+					 case 'load':
+						return true;
+					 case 'error':
+						aborter.abort();
+						throw new Error(`Corrupt index block: ${msg[1]} @${H.formatHexadec(msg[2])}`);
+					}
+				},
+				'abort': (e) => true,
+				'error': ({message: msg}) => {
+					throw new Error(`Failed to load index: ${msg}`);
+				}
+			});
+			let id = tskCnt++;
+			tsk = tsk.finally(() => tskPool.delete(id));
+			tsk = tsk.catch((err) => {
+				aborter.abort();
+				throw err;
+			});
+			tskPool.set(id, tsk);
+			if (tskPool.size >= this._loadConcurrency)
+				await Promise.race(tskPool.values());
+		}
+		await Promise.all(tskPool.values());
+		return idxRecs;
+	}
+
+	async _buildPool(idxRecs, blks) {
+		let pool = new DataPool(), idx = pool.index;
+		for (let rec of idxRecs) {
+			let trg = (
+				rec.type === 'artist' ? idx.artistMap :
+				rec.type === 'album'  ? idx.albumMap :
+				rec.type === 'song'   ? idx.songMap : idx.miscMap
+			);
+			trg.set(rec.id, rec);
+		}
+		pool.dataBlobs = blks.filter((blk) => blk.type === 'xiami-data-main')
+			.map((blk) => blk.blob);
+		return pool;
+	}
+
+	async load(f) {
+		try {
+			this._postMessage(['info', `Loading data pool: ${f.name}`]);
+			this._postMessage(['info', 'Reading header...']);
+			let blks    = await this._scanHeaderAndBlocks(f);
+			this._postMessage(['info', 'Reading index...']);
+			let bufIdx  = await this._readIndex(blks);
+			this._postMessage(['info', 'Loading index...']);
+			let idxRecs = await this._loadIndex(bufIdx);
+			this._postMessage(['info', 'Building data pool...']);
+			let pool    = await this._buildPool(idxRecs, blks);
+			this._postMessage(['success', `Successfully loaded: ${f.name}`]);
+			return pool;
+		} catch (err) {
+			this._postMessage(['error', err.message]);
+			throw err;
+		}
+	}
+
+}
+
 async function loadPoolIndicesP(f) {
 	let dat = null;
 	data.workers.progress = "读取索引……";

@@ -90,17 +90,56 @@ function closeDialog(dlg) {
 }
 
 // TODO: DOM binding
-H.callOnReadyP(function (e) {
+H.callOnReadyP(function () {
 	let eles = document.getElementsByTagName("template");
 	while (eles.length > 0) {
 		eles[0].remove();
 	}
-	document.getElementById("nav-search").addEventListener("click", (e) => { openDialog("search"); });
-	document.getElementById("nav-file").addEventListener("click", (e) => { openDialog("file"); });
-	document.getElementById("dialog-file-pool").addEventListener("change", function (e) {
-		if (this.files.length != 1)
+	document.getElementById("nav-search").addEventListener("click", (e) => void openDialog("search"));
+	document.getElementById("nav-file").addEventListener("click", (e) => void openDialog("file"));
+	document.getElementById("dialog-file-pool").addEventListener("click", async function (e) {
+		let fhndl;
+		try {
+			[fhndl] = await window.showOpenFilePicker({
+				id: 'pool',
+				multiple: false,
+				types: [
+					{accpet: {'application/octet-stream': ['.ijsom']}}
+				]
+			});
+		} catch (err) {
 			return;
-		let f = this.files[0];
+		}
+		let f = await fhndl.getFile();
+/*
+		let inf = '请稍等……';
+		let dlg = alertDialog('加载中', inf, true);
+		let updateInfo = (info) => updateDialog(dlg, inf = info);
+		let updateProgress = H.throttled((prog) => updateDialog(dlg, inf + ' ' + prog), 200);
+		let ldr = new DataPoolLoader();
+		let stub = ldr.load(f);
+		H.eventResolve(ldr, 'message', ({data: msg}) => {
+			switch (msg[0]) {
+			 case 'info':
+				console.log(msg[1]);
+				updateInfo(msg[1]);
+				return false;
+			 case 'progress':
+				updateProgress(msg[1]);
+				return false;
+			 case 'success':
+				console.info(msg[1]);
+				return true;
+			 case 'warning':
+				console.warn(msg[1]);
+				return false;
+			 case 'error':
+				console.error(msg[1]);
+				return true;
+			}
+		});
+		await stub;
+ */
 		this.previousElementSibling.value = f.name;
 		let inf = "请稍等……";
 		let dlg = alertDialog("加载中", inf, true);
@@ -108,14 +147,17 @@ H.callOnReadyP(function (e) {
 			if (data.workers.progress != null && data.workers.progress != inf)
 				updateDialog(dlg, inf = data.workers.progress);
 		}, 200);
-		loadPoolP(f).finally(function () {
-			window.clearInterval(hndl);
-			closeDialog(dlg);
-		}).then(function (dat) {
+		try {
+			let dat = await loadPoolP(f);
 			let cnt = dat.reduce((cnt, en) => cnt + (en.type == "song"), 0);
 			toast(`成功加载了 ${dat.length} 条索引，包含 ${cnt} 首音乐索引。`, 5000);
 			scene.switch("home");
-		}, (str) => { alertDialog("加载失败", str); });
+		} catch (err) {
+			alertDialog("加载失败", str);
+		} finally {
+			window.clearInterval(hndl);
+			closeDialog(dlg);
+		}
 	});
 	scene.main = page.main;
 	if (navigator.userAgent.match(/\b(?:Mobile|Android|iPhone|iPad)\b/i))

@@ -37,7 +37,7 @@ var H = {
 	},
 	/** @deprecated */
 	sleepP(t) {
-		return new Promise((resolve, reject) => window.setTimeout(resolve, t));
+		return new Promise((resolve, reject) => void window.setTimeout(resolve, t));
 	},
 	/** @deprecated */
 	restP() {
@@ -83,20 +83,18 @@ var H = {
 	/** @deprecated */
 	readFileP: (f) => H.fileReadArrayBuffer(f),
 	callOnReadyP(func) {
-		return new Promise(function (resolve, reject) {
-			if (document.readyState != "loading") {
-				resolve(func(null));
-				return;
-			}
-			function callback(e) {
-				document.removeEventListener("DOMContentLoaded", callback);
+		if (typeof func !== 'function')
+			throw new TypeError();
+		return new Promise((resolve, reject) => {
+			if (document.readyState !== 'loading')
+				return resolve(func(null));
+			document.addEventListener('DOMContentLoaded', (e) => {
 				try {
-					resolve(func(e));
+					resolve(func());
 				} catch (err) {
 					reject(err);
 				}
-			}
-			document.addEventListener("DOMContentLoaded", callback);
+			}, {once: true});
 		});
 	},
 	buildElement(typ, attrs, txt) {
@@ -176,6 +174,72 @@ var H = {
 				abort();
 		}
 		return worker;
+	},
+	limitInvocation(func, interval, linger = false, block = false) {
+		if (typeof func !== 'function')
+			throw new TypeError();
+		let lastClock = 0;
+		let blocked = false, timeout = 0;
+		let pendingNotify, pendingNotifyCancel, pendingArgs;
+		function request(...args) {
+			if (blocked) {
+				if (timeout === -1)
+					pendingNotifyCancel();
+			} else if (timeout !== 0) {
+				self.clearTimeout(timeout);
+				timeout = 0;
+				pendingNotifyCancel();
+			}
+			let stub = new Promise((...args) => [pendingNotify, pendingNotifyCancel] = args);
+			if (blocked) {
+				pendingArgs = args;
+				if (linger)
+					lastClock = self.performance.now();
+				timeout = -1;
+				return stub;
+			}
+			let delay = !linger ?
+				Math.max(interval - (self.performance.now() - lastClock), 0) :
+				interval;
+			timeout = self.setTimeout(invoke, delay, ...args);
+			return stub;
+		}
+		async function invoke(...args) {
+			if (!linger && !block)
+				lastClock = self.performance.now();
+			timeout = 0;
+			blocked = true;
+			let [notify, notifyError] = [pendingNotify, pendingNotifyCancel];
+			try {
+				notify(!block ? func(...args) : await func(...args));
+			} catch (err) {
+				notifyError(err);
+			}
+			blocked = false;
+			if (!block)
+				return;
+			if (!linger)
+				lastClock = self.performance.now();
+			if (timeout === -1) {
+				let delay = !linger ?
+					interval :
+					Math.max(interval - (self.performance.now() - lastClock), 0);
+				timeout = self.setTimeout(invoke, delay, ...pendingArgs);
+			}
+		}
+		return request;
+	},
+	throttled(func, interval) {
+		return H.limitInvocation(func, interval, false, false);
+	},
+	throttledAwait(func, interval) {
+		return H.limitInvocation(func, interval, false, true);
+	},
+	unrushed(func, cooldown) {
+		return H.limitInvocation(func, cooldown, true, false);
+	},
+	unrushedAwait(func, cooldown) {
+		return H.limitInvocation(func, cooldown, true, true);
 	},
 	Messenger: class extends EventTarget {
 		_postMessage(msg) {

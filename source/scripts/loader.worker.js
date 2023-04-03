@@ -21,25 +21,25 @@ function readPoolIndices(dat) {
 			if (typ) {
 				//TODO
 			} else if (!typ) {
-				self.postMessage({event: "progress", data: buf});
+				self.postMessage(['progress', buf]);
 				break;
 			} else {
-				self.postMessage({event: "error", message: "Unknown index type", code: typ});
+				self.postMessage(['error', 'Unknown index type', typ]);
 				return;
 			}
 			let en = readEntryIndex(typ, dat, off);
 			off += len;
 			buf.push(en);
 			if (buf.length >= 400) {
-				self.postMessage({event: "progress", data: buf});
+				self.postMessage(['progress', buf]);
 				buf = new Array();
 			}
 		}
-		self.postMessage({event: "load"});
+		self.postMessage(['load']);
 	} catch (err) {
-		self.postMessage({event: "error", message: err.message, code: null});
-		console.warn("Error in worker", err);
+		self.postMessage(['error', err.message, null]);
+		console.warn('Error in worker', err);
 	}
 }
 
-self.addEventListener("message", (e) => { readPoolIndices(e.data); });
+self.addEventListener('message', (e) => void readPoolIndices(e.data));

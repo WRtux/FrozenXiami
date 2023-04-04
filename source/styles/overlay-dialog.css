@@ -3,27 +3,39 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-.dialog-mask {
+#overlay-dialog {
+	position: fixed;
+	z-index: 2;
+	pointer-events: none;
+}
+#overlay-dialog> .dialog-layer {
 	position: fixed;
 	left: 0;
 	top: 0;
-	z-index: 2;
 	
-	display: none;
+	display: flex;
 	width: 100%;
 	height: 100%;
+	padding: 20px 0;
 	
-	content: "";
+	flex-direction: column;
+	align-items: center;
+	gap: 20px;
+	overflow: hidden auto;
 	
 	background-color: #00000066;
+	pointer-events: auto;
 }
-.dialog-mask.block-active { display: block; }
-.dialog-mask> .dialog {
-	position: fixed;
-	left: 50%;
-	top: 50%;
-	transform: translateX(-50%) translateY(-50%);
-	
+#overlay-dialog> .dialog-layer:not(.block-active) { display: none; }
+
+#overlay-dialog> .dialog-layer> :first-child {
+	margin-top: auto;
+}
+#overlay-dialog> .dialog-layer> :last-child {
+	margin-bottom: auto;
+}
+
+#overlay-dialog> .dialog-layer> .dialog {
 	min-width: 160px;
 	width: max-content;
 	max-width: 80%;
@@ -34,7 +46,7 @@
 	box-shadow: 2px 2px 5px #00000033;
 }
 
-.dialog> .dialog-close {
+#overlay-dialog> .dialog-layer> .dialog> .dialog-close {
 	position: absolute;
 	right: 0;
 	top: 0;
@@ -47,4 +59,4 @@
 	cursor: pointer;
 	transition: background-color 0.3s;
 }
-.dialog> .dialog-close:hover { background-color: #ff4411; }
+#overlay-dialog> .dialog-layer> .dialog> .dialog-close:hover { background-color: #ff4411; }

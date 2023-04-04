@@ -3,26 +3,26 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-#mask-toast {
+#overlay-toast {
 	position: fixed;
 	right: 0;
-	top: 0;
+	bottom: 60%;
 	z-index: 3;
 	
 	display: flex;
 	width: 80%;
-	height: 40%;
+	max-height: 40%;
 	
 	flex-direction: column;
 	justify-content: flex-end;
 	align-items: flex-end;
+	gap: 10px;
 	overflow: hidden;
 	
 	pointer-events: none;
 }
 
-#mask-toast> .toast {
-	margin-bottom: 10px;
+#overlay-toast> .toast {
 	min-width: 120px;
 	max-width: 480px;
 	border-left: 5px solid #ff8866;
@@ -35,7 +35,7 @@
 	pointer-events: auto;
 	animation: toast-in 0.3s 1;
 }
-#mask-toast> .toast.toast-clear {
+#overlay-toast> .toast.toast-clear {
 	animation: toast-out 0.5s 1;
 }
 @keyframes toast-in {

@@ -113,21 +113,23 @@
  </div>
 </aside>
 
-<div id="mask-toast">
+<div id="overlay-toast">
  <template id="toast-template">
   <div class="toast"><span><!-- Dynamic --></span></div>
  </template>
 </div>
 
-<div id="mask-dialog">
+<div id="overlay-dialog">
  <template id="dialog-template">
-  <div class="dialog-mask block-dynamic"><aside id="dialog" class="dialog block-content">
-   <h2><!-- Dynamic --></h2><button class="dialog-close"></button>
+  <div class="dialog-layer block-dynamic"><aside id="dialog" class="dialog block-content">
+   <button class="dialog-close"></button>
+   <h2><!-- Dynamic --></h2>
    <p><!-- Dynamic --></p>
   </aside></div>
  </template>
- <div class="dialog-mask"><aside id="dialog-search" class="dialog block-content">
-  <h2>快速搜索</h2><button class="dialog-close"></button>
+ <div class="dialog-layer"><aside id="dialog-search" class="dialog block-content">
+  <button class="dialog-close"></button>
+  <h2>快速搜索</h2>
   <p>根据关键词按默认排序进行即时搜索（最多显示 100 条结果）。<br />要进行自定义的搜索，请使用检索页。</p>
   <div class="content-line">
    <input type="text" placeholder="关键词" />
@@ -135,8 +137,9 @@
   </div>
   <!-- TODO -->
  </aside></div>
- <div class="dialog-mask"><aside id="dialog-file" class="dialog block-content">
-  <h2>信息池文件</h2><button class="dialog-close"></button>
+ <div class="dialog-layer"><aside id="dialog-file" class="dialog block-content">
+  <button class="dialog-close"></button>
+  <h2>信息池文件</h2>
   <p>仅支持带索引的信息池（<q>*.ijsom</q>）。JSON 数据需进行索引条目操作。</p>
   <div class="content-line">
    <input type="text" disabled placeholder="--" />

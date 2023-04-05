@@ -24,7 +24,7 @@
     "gulp-postcss": "^9.0",
     "gulp-uglify": "^3.0",
     "postcss": "^8.3",
-    "autoprefixer": "^10.3",
+    "postcss-preset-env": "^8.3.1",
     "cssnano": "^5.0",
     "uglify-js": "^3.14"
   },

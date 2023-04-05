@@ -12,7 +12,7 @@ const helper = require('./tools/helper');
 const gulpPostcss = require('gulp-postcss');
 const gulpUglify = require('gulp-uglify');
 const gulpLocalembed = require('./tools/localembed');
-const autoprefixer = require('autoprefixer');
+const cssPresetEnv = require('postcss-preset-env');
 const cssnano = require('cssnano');
 
 /* ========== Options ========== */
@@ -21,12 +21,20 @@ const options = {
     sourceDir: './source',
     staticDir: './static',
     buildDir: './build',
-    'autoprefixer': {
+
+    'postcss-preset-env': {
+        stage: 2,
+        enableClientSidePolyfills: false,
+        features: {
+            'is-pseudo-class': {
+                specificityMatchingName: '-dummy'
+            }
+        }
     },
     'cssnano': {
         preset: 'default'
     },
-    'uglify': {
+    'uglify-js': {
         module: false,
         compress: {}
     },
@@ -89,7 +97,7 @@ function buildMakeStylesheet(mode) {
 
 function buildOptimizeStylesheet() {
     return gulpPostcss([
-        autoprefixer(options['autoprefixer']),
+        cssPresetEnv(options['postcss-preset-env']),
         cssnano(options['cssnano'])
     ]);
 }
@@ -108,7 +116,7 @@ function buildMakeScript(mode) {
 }
 
 function buildOptimizeScript() {
-    return gulpUglify(options['uglify']);
+    return gulpUglify(options['uglify-js']);
 }
 
 function buildMakeSource(mode) {

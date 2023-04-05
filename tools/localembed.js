@@ -4,13 +4,13 @@
  */
 
 'use strict';
-const path = require('node:path');
-const stream = require('node:stream');
-const globParent = require('glob-parent');
-const Vinyl = require('vinyl');
-const vinylMatch = require('gulp-match');
+const path           = require('node:path');
+const stream         = require('node:stream');
+const globParent     = require('glob-parent');
+const Vinyl          = require('vinyl');
+const vinylMatch     = require('gulp-match');
 const vinylSourcemap = require('vinyl-sourcemap');
-const Concat = require('concat-with-sourcemaps');
+const Concat         = require('concat-with-sourcemaps');
 
 /* ========== Internal Functions ========== */
 
@@ -29,7 +29,7 @@ function attachSourceMap(file, targetDir, embed = true) {
     file.sourceMap.sourceRoot = path.relative(dir, file.base).replaceAll(path.sep, '/');
     !embed && delete file.sourceMap.sourcesContent;
     let mapfile = null;
-    vinylSourcemap.write(file, embed ? null : '.', (err, _f, mapf) => {
+    vinylSourcemap.write(file, embed ? null : '.', (err, f, mapf) => {
         if (err != null)
             throw err;
         mapfile = mapf;
@@ -55,13 +55,13 @@ function handleMerge(op, files, opts) {
     return files;
 }
 
-function handleMigrate(op, files, _opts) {
+function handleMigrate(op, files, opts) {
     for (let f of files) {
         for (let src of op.sources) {
-            if (!matchPath(f, src, true))
-                continue;
-            f.path = path.resolve(f.base, op.target, path.relative(globParent(src), f.relative));
-            break;
+            if (matchPath(f, src, true)) {
+                f.path = path.resolve(f.base, op.target, path.relative(globParent(src), f.relative));
+                break;
+            }
         }
     }
     return files;
@@ -71,7 +71,7 @@ function handleEmbedWorker(op, files, opts) {
     let target = files.find((f) => matchPath(f, op.target));
     let matches = files.filter((f) => op.sources.some((src) => matchPath(f, src, true)));
     if (target == null || matches.length === 0)
-       return files;
+        return files;
     files = files.filter((f) => f === target || !matches.includes(f));
     let concat = new Concat(opts.keepSourceMap, path.basename(op.target));
     let name = op.name ?? path.basename(path.basename(matches[0].basename, '.js'), '.worker');
@@ -93,20 +93,20 @@ function handleEmbedWorker(op, files, opts) {
 
 const handlers = {
     'stylesheet': handleMerge,
-    'bundle': handleMerge,
-    'worker': handleEmbedWorker,
-    'migrate': handleMigrate
+    'bundle':     handleMerge,
+    'worker':     handleEmbedWorker,
+    'migrate':    handleMigrate
 };
 
 /* ========== Exports ========== */
 
-function transform(ops, opts) {
+function transform(ops, opts = null) {
     opts ??= {};
     if (typeof ops !== 'object' || typeof opts !== 'object')
         throw new TypeError();
     for (let op of ops) {
         if (typeof op !== 'object' || !(op.type in handlers))
-           throw new TypeError();
+            throw new TypeError();
     }
     if (opts.targetDir != null && typeof opts.targetDir !== 'string')
         throw new TypeError();
@@ -115,7 +115,7 @@ function transform(ops, opts) {
     let files = [];
     return new stream.Transform({
         objectMode: true,
-        transform(f, _enc, callback) {
+        transform(f, enc, callback) {
             if (!Vinyl.isVinyl(f))
                 return callback(new TypeError());
             if (f.isDirectory())

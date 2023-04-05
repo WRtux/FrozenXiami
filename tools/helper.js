@@ -4,16 +4,16 @@
  */
 
 'use strict';
-const path = require('node:path');
-const stream = require('node:stream');
-const Vinyl = require('vinyl');
+const path           = require('node:path');
+const stream         = require('node:stream');
+const Vinyl          = require('vinyl');
 const vinylSourcemap = require('vinyl-sourcemap');
 
 // Identity transform.
 function buildIdentity() {
     return new stream.Transform({
         objectMode: true,
-        transform: (chunk, _enc, callback) => callback(null, chunk)
+        transform: (chunk, enc, callback) => callback(null, chunk)
     });
 }
 
@@ -25,7 +25,7 @@ function composePipeline(pipeline) {
 function buildInitSourceMap() {
     return new stream.Transform({
         objectMode: true,
-        transform(f, _enc, callback) {
+        transform(f, enc, callback) {
             if (!Vinyl.isVinyl(f))
                 return callback(new TypeError());
             if (f.isDirectory() || f.isNull())
@@ -38,14 +38,14 @@ function buildInitSourceMap() {
 function buildEmbedSourceMap() {
     return new stream.Transform({
         objectMode: true,
-        transform(f, _enc, callback) {
+        transform(f, enc, callback) {
             if (!Vinyl.isVinyl(f))
                 return callback(new TypeError());
             if (f.isDirectory() || f.isNull() || f.sourceMap == null)
                 return callback(null, f);
             f.sourceMap.file = f.basename;
             f.sourceMap.sourceRoot = path.relative(f.dirname, f.base).replaceAll(path.sep, '/');
-            vinylSourcemap.write(f, null, (err, f, _map) => callback(err, f));
+            vinylSourcemap.write(f, null, (err, f, map) => callback(err, f));
         }
     });
 }

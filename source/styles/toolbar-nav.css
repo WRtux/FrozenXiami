@@ -23,7 +23,7 @@
 	cursor: pointer;
 	transition: color 0.3s;
 }
-#nav .nav-item.icon {
+#nav .nav-item:is([class^="icon-"], [class*=" icon-"]) {
 	font-size: 20px;
 }
 #nav .nav-item.block-active { font-weight: 600; }

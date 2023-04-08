@@ -20,15 +20,21 @@
     },
     {
       "uid": "75b228ebc26946ca00360ca10f052e3c",
-      "css": "previous",
-      "code": 9194,
+      "css": "last-track",
+      "code": 9198,
       "src": "mfglabs"
     },
     {
       "uid": "dcda6b27f1f63fbd7b8bf8d45cc4d340",
-      "css": "next",
-      "code": 9193,
+      "css": "next-track",
+      "code": 9197,
       "src": "mfglabs"
+    },
+    {
+      "uid": "fee6e00f36e8ca8ef3e4a62caa213bf6",
+      "css": "volume",
+      "code": 128265,
+      "src": "fontawesome"
     },
     {
       "uid": "7eed700d710c276569f95be26326fa5b",
@@ -43,39 +49,39 @@
       "src": "elusive"
     },
     {
-      "uid": "815503841e980c848f55e0271deacead",
-      "css": "link",
-      "code": 9939,
-      "src": "entypo"
-    },
-    {
       "uid": "107ce08c7231097c7447d8f4d059b55f",
       "css": "ellipsis",
       "code": 8230,
       "src": "fontawesome"
     },
     {
-      "uid": "fee6e00f36e8ca8ef3e4a62caa213bf6",
-      "css": "volume",
-      "code": 9086,
-      "src": "fontawesome"
-    },
-    {
-      "uid": "248db7c0563d8cee80b7041f7736dcad",
-      "css": "database",
-      "code": 9899,
+      "uid": "815503841e980c848f55e0271deacead",
+      "css": "link",
+      "code": 128279,
       "src": "entypo"
     },
     {
       "uid": "9dd9e835aebe1060ba7190ad2b2ed951",
       "css": "search",
-      "code": 9906,
+      "code": 128269,
       "src": "fontawesome"
+    },
+    {
+      "uid": "248db7c0563d8cee80b7041f7736dcad",
+      "css": "database",
+      "code": 9689,
+      "src": "entypo"
+    },
+    {
+      "uid": "62b0580ee8edc3a3edfbf68a47c852d5",
+      "css": "edit",
+      "code": 9999,
+      "src": "elusive"
     },
     {
       "uid": "3d4ea8a78dc34efe891f3a0f3d961274",
       "css": "info",
-      "code": 105,
+      "code": 8505,
       "src": "fontawesome"
     },
     {
@@ -87,13 +93,25 @@
     {
       "uid": "00391fac5d419345ffcccd95b6f76263",
       "css": "warning",
-      "code": 33,
+      "code": 10071,
       "src": "fontawesome"
     },
     {
       "uid": "5211af474d3a9848f67f945e2ccaf143",
       "css": "error",
       "code": 10005,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "44e04715aecbca7f266a17d5a7863c68",
+      "css": "add",
+      "code": 10133,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "861ab06e455e2de3232ebef67d60d708",
+      "css": "dismiss",
+      "code": 10134,
       "src": "fontawesome"
     },
     {

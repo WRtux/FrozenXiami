@@ -36,6 +36,8 @@
 }
 
 #overlay-dialog> .dialog-layer> .dialog {
+	position: relative;
+
 	min-width: 160px;
 	width: max-content;
 	max-width: 80%;
@@ -47,16 +49,20 @@
 }
 
 #overlay-dialog> .dialog-layer> .dialog> .dialog-close {
-	position: absolute;
-	right: 0;
-	top: 0;
-	transform: translateX(50%) translateY(-50%);
+	float: right;
 	
-	width: 20px;
-	height: 20px;
+	margin: 0;
+	width: 32px;
+	height: 24px;
 	
-	background-color: #ff441166;
+	font-size: 20px;
+	line-height: 24px;
+	text-align: center;
+	
 	cursor: pointer;
-	transition: background-color 0.3s;
+	transition: background-color 0.3s, color 0.3s;
 }
-#overlay-dialog> .dialog-layer> .dialog> .dialog-close:hover { background-color: #ff4411; }
+#overlay-dialog> .dialog-layer> .dialog> .dialog-close:hover {
+	background-color: #eeeeee;
+	color: #ff4411;
+}

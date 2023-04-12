@@ -1,9 +1,9 @@
-name: "Automatic building"
+name: "Automated building and deployment"
 
 on:
   workflow_dispatch:
   push:
-    branches: ["main"]
+    branches: ["main", "dev/**"]
     paths: ["gulpfile.js", "source/**", "static/**"]
 
 jobs:
@@ -12,6 +12,8 @@ jobs:
       matrix:
         build-type: ["dev", "site"]
     name: "Build all"
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
     - name: "Checkout repository"
@@ -22,7 +24,8 @@ jobs:
         node-version: 16
         cache: npm
         cache-dependency-path: "package-lock.json"
-    - run: >
+    - name: "Install packages"
+      run: >
         npm ci
     - name: "Build ${{matrix.build-type}}"
       run: >
@@ -32,3 +35,32 @@ jobs:
       with:
         name: "build-${{matrix.build-type}}"
         path: "build/"
+
+  deploy:
+    name: "Deploy site"
+    if: github.ref_type == 'branch' && github.ref_name == 'main'
+    needs: build-all
+    concurrency: deploy
+    permissions:
+      id-token: write
+      pages: write
+    environment:
+      name: github-pages
+      url: "${{steps.deploy-pages.outputs.page_url}}"
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Download site artifact"
+      uses: actions/download-artifact@v3
+      with:
+        name: "build-site"
+        path: "site/"
+    - name: "Re-upload as Pages artifact"
+      uses: actions/upload-pages-artifact@v1
+      with:
+        name: "pages"
+        path: "site/"
+    - id: deploy-pages
+      name: "Deploy to GitHub Pages"
+      uses: actions/deploy-pages@v2
+      with:
+        artifact_name: "pages"

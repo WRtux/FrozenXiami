@@ -3,17 +3,23 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-:root {
-	--font-sans: "Arial", "PingFang SC", "Droid Sans", "Microsoft YaHei", "Calibri", sans-serif;
-	--font-monospace: "Consolas", "Droid Sans Mono", "Courier New", "Monaco", "Lucida Console", monospace;
-}
-
 body, body * {
 	all: unset;
 	box-sizing: border-box;
 }
-div, article, aside, header, section, iframe { display: block; }
-template, script { display: none; }
+body, header, main, footer,
+article, aside, nav, section,
+div, iframe {
+	display: block;
+}
+template, style, script {
+	display: none;
+}
+
+:root {
+	--font-sans: "Arial", "PingFang SC", "Droid Sans", "Microsoft YaHei", "Calibri", sans-serif;
+	--font-monospace: "Consolas", "Droid Sans Mono", "Courier New", "Monaco", "Lucida Console", monospace;
+}
 
 html {
 	height: 100%;
@@ -22,8 +28,8 @@ html {
 body {
 	display: flex;
 	margin: 0 auto;
-	min-width: 85%;
-	width: 1200px;
+	min-width: min(90%, 180vh);
+	width: 1280px;
 	max-width: 100%;
 	min-height: 100%;
 	
@@ -34,35 +40,42 @@ body {
 	color: #333333;
 }
 
-#nav, #main, #player {
-	display: flex;
+body> :is(#nav, #main, #player) {
 	padding: 0 6%;
 }
 @media screen and (max-width: 800px) {
-	#nav, #main, #player {
+	body> :is(#nav, #main, #player) {
 		padding-left: 20px;
 		padding-right: 20px;
 	}
 }
 @media screen and (max-width: 540px) {
-	#player {
+	body> #player {
 		padding-left: 0;
 		padding-right: 0;
 	}
 }
 
-#nav, #player {
-	position: sticky;
+body> #nav, body> #player {
 	z-index: 1;
 	background-color: #ffffff;
 }
-#nav { top: 0; }
-#player { bottom: 0; }
+@media screen and (min-height: 480px) {
+	body> #nav {
+		position: sticky;
+		top: 0;
+	}
+}
+body> #player {
+	position: sticky;
+	bottom: 0;
+}
 
 #main {
 	position: relative;
 	z-index: 0;
 	
+	display: flex;
 	flex-grow: 1;
 	
 	align-items: flex-start;
@@ -71,11 +84,14 @@ body {
 
 #main> .main-sidebar {
 	position: relative;
+	z-index: 1;
 	
 	margin: 20px 40px 0 0;
-	width: 120px;
+	width: 160px;
 	flex-grow: 1;
+	padding: 15px;
 	
+	contain: layout;
 	overflow: hidden;
 	
 	background-color: #ffffff;
@@ -84,9 +100,14 @@ body {
 	#main> .main-sidebar { margin-right: 20px; }
 }
 #main> .main-main {
+	position: relative;
+	
 	margin-top: 20px;
-	width: 200px;
+	width: 320px;
+	padding: 15px 0;
 	flex-grow: 6;
+	
+	contain: layout;
 }
 
 @media screen and (max-width: 540px) {

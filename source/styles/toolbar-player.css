@@ -4,6 +4,8 @@
  */
 
 #player {
+	position: relative;
+	display: flex;
 	height: 80px;
 }
 

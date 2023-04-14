@@ -4,7 +4,9 @@
  */
 
 #nav {
-	height: 60px;
+	position: relative;
+	display: flex;
+	height: 70px;
 	align-items: center;
 	overflow: hidden;
 }

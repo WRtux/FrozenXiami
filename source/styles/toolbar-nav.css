@@ -5,8 +5,10 @@
 
 #nav {
 	position: relative;
+	
 	display: flex;
 	height: 70px;
+	padding: 0 var(--body-padding);
 	align-items: center;
 	overflow: hidden;
 }

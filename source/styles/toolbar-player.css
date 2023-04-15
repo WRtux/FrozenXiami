@@ -5,8 +5,16 @@
 
 #player {
 	position: relative;
+	
 	display: flex;
 	height: 80px;
+	padding: 0 var(--body-padding);
+}
+@media screen and (max-width: 540px) {
+	#player {
+		padding-left: 0;
+		padding-right: 0;
+	}
 }
 
 #player> .player-top {

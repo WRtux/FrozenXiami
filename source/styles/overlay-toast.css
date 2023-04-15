@@ -5,13 +5,15 @@
 
 #overlay-toast {
 	position: fixed;
+	left: 0;
 	right: 0;
+	top: 0;
 	bottom: 60%;
 	z-index: 3;
 	
 	display: flex;
-	width: 80%;
-	max-height: 40%;
+	margin: 0 auto;
+	width: var(--body-width);
 	
 	flex-direction: column;
 	justify-content: flex-end;

@@ -17,8 +17,16 @@ template, style, script {
 }
 
 :root {
+	--body-width: clamp(min(90%, 180vh), 1280px, 100%);
+	--body-padding: 6%;
+	
 	--font-sans: "Arial", "PingFang SC", "Droid Sans", "Microsoft YaHei", "Calibri", sans-serif;
 	--font-monospace: "Consolas", "Droid Sans Mono", "Courier New", "Monaco", "Lucida Console", monospace;
+}
+@media screen and (max-width: 800px) {
+	:root {
+		--body-padding: 20px;
+	}
 }
 
 html {
@@ -28,9 +36,7 @@ html {
 body {
 	display: flex;
 	margin: 0 auto;
-	min-width: min(90%, 180vh);
-	width: 1280px;
-	max-width: 100%;
+	width: var(--body-width);
 	min-height: 100%;
 	
 	flex-direction: column;
@@ -40,27 +46,17 @@ body {
 	color: #333333;
 }
 
-body> :is(#nav, #main, #player) {
-	padding: 0 6%;
-}
-@media screen and (max-width: 800px) {
-	body> :is(#nav, #main, #player) {
-		padding-left: 20px;
-		padding-right: 20px;
-	}
-}
-@media screen and (max-width: 540px) {
-	body> #player {
-		padding-left: 0;
-		padding-right: 0;
-	}
+body> :not([id^="overlay"]) {
+	padding: 0 var(--body-padding);
 }
 
 body> #nav, body> #player {
+	position: relative;
 	z-index: 1;
-	background-color: #ffffff;
+	
+	background-color: inherit;
 }
-@media screen and (min-height: 480px) {
+@media not screen and (max-height: 480px) {
 	body> #nav {
 		position: sticky;
 		top: 0;
@@ -89,7 +85,7 @@ body> #player {
 	margin: 20px 40px 0 0;
 	width: 160px;
 	flex-grow: 1;
-	padding: 15px;
+	padding: 20px;
 	
 	contain: layout;
 	overflow: hidden;
@@ -104,7 +100,7 @@ body> #player {
 	
 	margin-top: 20px;
 	width: 320px;
-	padding: 15px 0;
+	padding: 20px 0;
 	flex-grow: 6;
 	
 	contain: layout;

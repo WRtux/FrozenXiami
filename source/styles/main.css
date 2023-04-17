@@ -12,13 +12,22 @@
 	--spacing: 15px;
 }
 
+.block-main> * {
+	margin: var(--spacing) 0;
+}
+.block-main> *:first-child {
+	margin-top: 0;
+}
+.block-main> *:last-child {
+	margin-bottom: 0;
+}
+
 .block-main> .main-menu {
 	display: block;
-	margin: var(--spacing);
 }
 .block-main> .main-menu> li {
 	display: block;
-	margin-bottom: calc(var(--spacing) * 2 / 3);
+	margin-bottom: 10px;
 	padding: 5px 0;
 	
 	font-weight: 300;
@@ -49,7 +58,6 @@
 	position: relative;
 	z-index: 0;
 	
-	margin: var(--spacing) 0;
 	padding-bottom: 100%;
 }
 
@@ -141,7 +149,6 @@
 
 .block-main> .main-infolist {
 	display: grid;
-	margin: var(--spacing) 0;
 	
 	grid-template-rows: repeat(1000, auto);
 	grid-template-columns: minmax(4.0em, auto) 1fr;
@@ -152,6 +159,7 @@
 .block-main> .main-infolist> dt {
 	grid-column: 1;
 	
+	margin-top: 0.2em;
 	margin-right: 1.0em;
 	
 	font-weight: 300;
@@ -162,7 +170,7 @@
 .block-main> .main-infolist> dd {
 	grid-column: 2;
 	
-	margin-bottom: calc(var(--spacing) / 3);
+	margin-bottom: 0.2em;
 	
 	font-weight: 400;
 	white-space: nowrap;
@@ -172,8 +180,11 @@
 .block-main> .main-banner {
 	position: relative;
 	display: block;
-	margin: -20px 0 var(--spacing) 0;
 }
+#main> .main-main.block-main> .main-banner:first-child {
+	margin-top: -40px;
+}
+
 .block-main> .main-banner> img:nth-child(2) {
 	display: block;
 	width: 100%;
@@ -189,7 +200,6 @@
 
 .block-main> .main-title {
 	display: block;
-	margin: var(--spacing) 0;
 }
 .block-main> h1.main-title {
 	font-size: 1.5em;
@@ -202,7 +212,6 @@
 
 .block-main> .main-user {
 	display: flex;
-	margin: var(--spacing) 0;
 	overflow-x: auto;
 	align-items: center;
 }
@@ -219,21 +228,19 @@
 	object-fit: cover;
 }
 .block-main> .main-user> span {
-	margin-right: calc(var(--spacing) + 5px);
+	margin-right: calc(0.5em + 10px);
 	padding: 5px;
 }
 .block-main> .main-user> span:last-child { margin-right: 0; }
 
 .block-main> [class^="main-flow"] {
 	display: grid;
-	margin: var(--spacing) 0;
 	
-	justify-items: center;
-	grid-gap: 0 calc(var(--spacing) * 2 / 3);
-	grid-template-columns: repeat(auto-fill, minmax(calc(90px + 2vw), auto));
+	justify-items: stretch;
+	grid-template-columns: repeat(auto-fill, minmax(calc(90px + 2vw), 1fr));
 }
 .block-main> .main-flow-list, .block-main> .main-flow-style {
-	grid-template-columns: repeat(auto-fill, minmax(calc(150px + 6vw), auto));
+	grid-template-columns: repeat(auto-fill, minmax(calc(150px + 6vw), 1fr));
 }
 
 .block-main> [class^="main-flow"].block-clamp {
@@ -243,18 +250,16 @@
 }
 
 .block-main> [class^="main-flow"]> figure {
-	margin: 0 0 var(--spacing) 0;
-	width: 100%;
+	padding: 10px;
 	cursor: pointer;
-	--spacing: 10px;
 }
+.block-main> [class^="main-flow"]> figure:hover { background-color: #eeeeee; }
 
 .block-main> .main-flow-list> figure {
-	padding: var(--spacing);
+	margin: 5px;
 	background-color: #333333;
 	color: #f7f7f7;
 }
-.block-main> .main-flow> figure:hover { background-color: #eeeeee; }
 .block-main> .main-flow-list> figure:hover { background-color: #000000; }
 
 @media screen and (max-width: 540px) {
@@ -264,28 +269,30 @@
 }
 @media screen and (min-width: 1440px) {
 	.block-main> [class^="main-flow"] {
-		grid-template-columns: repeat(auto-fill, minmax(calc(6vw + 30px), auto));
+		grid-template-columns: repeat(auto-fill, minmax(calc(6vw + 30px), 1fr));
 	}
-	.block-main> .main-flow-list { grid-template-columns: repeat(auto-fill, minmax(calc(10vw + 90px), auto)); }
-	.block-main> .main-flow-style { grid-template-columns: repeat(auto-fill, minmax(calc(12vw + 60px), auto)); }
+	.block-main> .main-flow-list { grid-template-columns: repeat(auto-fill, minmax(calc(10vw + 90px), 1fr)); }
+	.block-main> .main-flow-style { grid-template-columns: repeat(auto-fill, minmax(calc(12vw + 60px), 1fr)); }
 	.block-main> .main-flow-style> figure {
-		margin-left: var(--spacing);
-		margin-right: var(--spacing);
+		margin-left: 15px;
+		margin-right: 15px;
 	}
 }
 
+[class^="main-flow"]> .block-main {
+	--spacing: 10px;
+}
+
 [class^="main-flow"]> .block-main> [class^="main-cover"] {
-	margin-top: 0;
 	margin-left: 0;
 	margin-right: 0;
 	width: auto;
 	padding-bottom: 100%;
 }
-.main-flow-list> .block-main> .main-cover {
-	---: calc(var(--spacing) * -1);
-	margin-top: var(---);
-	margin-left: var(---);
-	margin-right: var(---);
+.main-flow-list> .block-main> .main-cover:first-child {
+	margin-top: -10px;
+	margin-left: -10px;
+	margin-right: -10px;
 	padding-bottom: 60%;
 }
 

@@ -14,8 +14,7 @@
 
 .block-content> h1, .block-content> h2, .block-content> h3,
 .block-content> p, .block-content> blockquote, .block-content> code,
-.block-content> ul, .block-content> ol, .block-content> dl, .block-content> img,
-.block-content> .content-block, .block-content> .content-line {
+.block-content> ul, .block-content> ol, .block-content> dl, .block-content> img {
 	display: block;
 	margin: var(--spacing) 0;
 }
@@ -98,68 +97,3 @@
 	font-family: var(--font-monospace);
 }
 .block-content q::before, .block-content q::after { content: none; }
-
-.block-content> .content-block {
-	position: relative;
-	z-index: 0;
-}
-
-.block-content> .content-line {
-	display: flex;
-	align-items: center;
-}
-
-.block-content> .content-line> input, .block-content> .content-line> button {
-	align-self: stretch;
-	min-width: 40px;
-	min-height: 24px;
-	
-	background-color: #ff4411;
-	color: #f7f7f7;
-}
-
-.block-content> .content-line> input[type="text"] {
-	flex-grow: 1;
-	border: 1px solid #cccccc;
-	padding: 0 5px;
-	
-	font-size: 13px;
-	
-	background-color: transparent;
-	color: #333333;
-}
-
-.block-content> .content-line> input[type="file"] {
-	position: relative;
-	width: 40px;
-	font-size: 0;
-	cursor: pointer;
-}
-.block-content> .content-line> input[type="file"]::before, .block-content> .content-line> input[type="file"]::after {
-	position: absolute;
-	left: 0;
-	
-	width: 100%;
-	
-	content: "";
-}
-.block-content> .content-line> input[type="file"]::before {
-	top: 0;
-	height: 100%;
-	background-color: #ff4411;
-}
-.block-content> .content-line> input[type="file"]::after {
-	top: 50%;
-	transform: translateY(-50%);
-	
-	content: "…";
-	font-size: 16px;
-	font-weight: 600;
-	text-align: center;
-}
-
-.block-content> .content-line> button {
-	padding: 0 10px;
-	text-align: center;
-	cursor: pointer;
-}

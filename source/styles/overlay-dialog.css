@@ -28,10 +28,10 @@
 }
 #overlay-dialog> .dialog-layer:not(.block-active) { display: none; }
 
-#overlay-dialog> .dialog-layer> :first-child {
+#overlay-dialog> .dialog-layer> *:first-child {
 	margin-top: auto;
 }
-#overlay-dialog> .dialog-layer> :last-child {
+#overlay-dialog> .dialog-layer> *:last-child {
 	margin-bottom: auto;
 }
 
@@ -39,10 +39,8 @@
 	position: relative;
 
 	min-width: 160px;
-	width: max-content;
-	max-width: 80%;
-	border: 1px solid #cccccc;
-	padding: 10px;
+	max-width: 90%;
+	padding: 20px;
 	
 	background-color: #ffffff;
 	box-shadow: 2px 2px 5px #00000033;
@@ -52,12 +50,9 @@
 	float: right;
 	
 	margin: 0;
-	width: 32px;
-	height: 24px;
+	padding: 5px;
 	
-	font-size: 20px;
-	line-height: 24px;
-	text-align: center;
+	font-size: 22px;
 	
 	cursor: pointer;
 	transition: background-color 0.3s, color 0.3s;
@@ -65,4 +60,9 @@
 #overlay-dialog> .dialog-layer> .dialog> .dialog-close:hover {
 	background-color: #eeeeee;
 	color: #ff4411;
+}
+@media screen and (max-width: 540px) {
+	#overlay-dialog> .dialog-layer> .dialog> .dialog-close {
+		font-size: 20px;
+	}
 }

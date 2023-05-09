@@ -18,13 +18,14 @@
 <body>
 
 <nav id="nav">
- <img class="nav-logo" src="web/logo.png" alt="Logo" />
- <a class="nav-item">发现</a>
- <a class="nav-item">个人</a>
- <a class="nav-item">检索</a>
- <div class="nav-side">
-  <button id="nav-search" class="nav-item icon-search"></button>
-  <button id="nav-file" class="nav-item icon-database"></button>
+ <div class="nav-main">
+  <img class="nav-logo" src="web/logo.png" alt="Logo" />
+  <a class="nav-item">发现</a>
+  <a class="nav-item">个人</a>
+  <a class="nav-item">检索</a>
+ </div><div class="nav-side">
+  <button type="button" id="nav-search" class="nav-item icon-search"></button>
+  <button type="button" id="nav-file" class="nav-item icon-database"></button>
   <span id="nav-avatar" class="nav-avatar">用户</span>
  </div>
 </nav>
@@ -103,13 +104,14 @@
    <span id="player-title">标题</span>
    <span id="player-artist">艺人</span>
   </div>
+  <button type="button" class="player-item player-dispensable icon-heart"></button>
  </div><div class="player-control">
-  <button id="player-prev" class="player-control-side icon-last-track"></button>
-  <button id="player-play" class="player-control-center icon-play"></button>
-  <button id="player-next" class="player-control-side icon-next-track"></button>
+  <button type="button" id="player-prev" class="player-control-side icon-last-track"></button>
+  <button type="button" id="player-play" class="player-control-center icon-play"></button>
+  <button type="button" id="player-next" class="player-control-side icon-next-track"></button>
  </div><div class="player-side">
-  <button class="player-item icon-volume"></button>
-  <button id="player-more" class="player-item icon-more"></button>
+  <button type="button" class="player-item icon-volume"></button>
+  <button type="button" id="player-playlist" class="player-item icon-playlist"></button>
  </div>
 </aside>
 

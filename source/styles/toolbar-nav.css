@@ -9,35 +9,62 @@
 	display: flex;
 	height: 70px;
 	padding: 0 var(--body-padding);
+}
+#nav> .nav-main, #nav> .nav-side {
+	display: flex;
 	align-items: center;
-	overflow: hidden;
+}
+#nav> .nav-main {
+	flex-grow: 1;
 }
 
-#nav> .nav-logo {
-	margin-right: 20px;
-	height: 40px;
+#nav> *, #nav> *> * {
 	flex-shrink: 0;
 }
+#nav> *> * {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+#nav> *:first-child> *:first-child {
+	margin-left: 0;
+}
+#nav> *:last-child> *:last-child {
+	margin-right: 0;
+}
+
+#nav .nav-logo {
+	margin-right: 20px;
+	height: 40px;
+}
 @media screen and (max-width: 540px) {
-	#nav> .nav-logo { margin-right: 10px; }
+	#nav .nav-logo { margin-right: 10px; }
 }
 
 #nav .nav-item {
+	margin-left: 0;
+	margin-right: 0;
 	padding: 5px 10px;
+	
+	font-weight: 300;
+	
 	cursor: pointer;
-	transition: color 0.3s;
-}
-#nav .nav-item:is([class^="icon-"], [class*=" icon-"]) {
-	font-size: 20px;
+	transition: font-size 0.3s, color 0.3s;
 }
 #nav .nav-item.block-active { font-weight: 600; }
 #nav .nav-item:not(.block-active):hover { color: #ff4411; }
 
+#nav .nav-item:is([class^="icon-"], [class*=" icon-"]) {
+	font-size: 22px;
+}
+@media screen and (max-width: 540px) {
+	#nav .nav-item:is([class^="icon-"], [class*=" icon-"]) {
+		font-size: 20px;
+	}
+}
+
 #nav .nav-avatar {
-	margin: 0 5px;
 	width: 35px;
 	height: 35px;
-	flex-shrink: 0;
 	border-radius: 50%;
 	
 	font-size: 12px;
@@ -48,28 +75,19 @@
 	user-select: none;
 }
 
-#nav> .nav-side {
-	flex-grow: 1;
-	display: flex;
-	margin-left: 5px;
-	
-	justify-content: flex-end;
-	align-items: center;
-}
-
 @media screen and (max-width: 540px) {
 	#nav {
+		height: 60px;
 		border-bottom: 2px solid #ff4411;
-		align-items: flex-end;
-	}
-	#nav> .nav-logo, #nav> .nav-side {
-		align-self: center;
 	}
 	#nav .nav-item {
 		padding-left: 5px;
 		padding-right: 5px;
 	}
-	#nav .nav-item.block-active {
+	#nav> .nav-main> .nav-item {
+		align-self: flex-end;
+	}
+	#nav> .nav-main> .nav-item.block-active {
 		border-bottom: 3px solid #ff4411;
 		padding-bottom: 2px;
 		

@@ -8,8 +8,8 @@ var page = {
 	
 	main: document.getElementById("main"),
 	masks: {
-		toast: document.getElementById("mask-toast"),
-		dialog: document.getElementById("mask-dialog")
+		toast: document.getElementById("overlay-toast"),
+		dialog: document.getElementById("overlay-dialog")
 	},
 	templates: {
 		main: document.getElementById("main-template").content,
@@ -42,7 +42,7 @@ function toast(inf, t) {
 	ele.addEventListener("click", (e) => { clearToast(ele); });
 	ele.firstElementChild.textContent = inf;
 	page.masks.toast.appendChild(ele);
-	window.setTimeout(() => { clearToast(ele); }, t != null ? t : 2000);
+	window.setTimeout(() => { clearToast(ele); }, t != null ? t : 3000);
 	return ele;
 }
 
@@ -61,7 +61,7 @@ function openDialog(n) {
 		dlg.id = "dialog-" + n;
 	}
 	ele.classList.add("block-active");
-	dlg.querySelector(".dialog> .dialog-close").addEventListener("click", (e) => { closeDialog(dlg); });
+	dlg.querySelector(".dialog> .dialog-close").addEventListener("click", (e) => void closeDialog(dlg), {once: true});
 	page.masks.dialog.appendChild(ele);
 	return dlg;
 }
@@ -69,7 +69,7 @@ function alertDialog(tt, inf, blk) {
 	let n = Math.floor(Math.random() * 36 ** 5).toString(36).padStart(5, '0');
 	let dlg = openDialog(n);
 	dlg.querySelector(".dialog> h2").textContent = (tt != null) ? tt : "提示";
-	dlg.querySelector(".dialog> p").textContent = inf;
+	dlg.querySelector(".dialog> .block-content> p").textContent = inf;
 	blk && dlg.querySelector(".dialog> .dialog-close").remove();
 	return dlg;
 }
@@ -77,7 +77,7 @@ function alertDialog(tt, inf, blk) {
 function updateDialog(dlg, inf) {
 	dlg = dlg instanceof Element ? dlg : document.getElementById("dialog-" + dlg);
 	if (dlg != null && inf != null)
-		dlg.querySelector(".dialog> p").textContent = inf;
+		dlg.querySelector(".dialog> .block-content> p").textContent = inf;
 }
 
 function closeDialog(dlg) {
@@ -89,6 +89,7 @@ function closeDialog(dlg) {
 	return dlg;
 }
 
+// TODO: DOM binding
 H.callOnReadyP(function (e) {
 	let eles = document.getElementsByTagName("template");
 	while (eles.length > 0) {
@@ -106,17 +107,17 @@ H.callOnReadyP(function (e) {
 		let hndl = window.setInterval(function () {
 			if (data.workers.progress != null && data.workers.progress != inf)
 				updateDialog(dlg, inf = data.workers.progress);
-		}, 100);
+		}, 200);
 		loadPoolP(f).finally(function () {
 			window.clearInterval(hndl);
 			closeDialog(dlg);
 		}).then(function (dat) {
 			let cnt = dat.reduce((cnt, en) => cnt + (en.type == "song"), 0);
-			toast(`成功加载了 ${dat.length} 条索引，包含 ${cnt} 首音乐索引。`, 3000);
+			toast(`成功加载了 ${dat.length} 条索引，包含 ${cnt} 首音乐索引。`, 5000);
 			scene.switch("home");
 		}, (str) => { alertDialog("加载失败", str); });
 	});
 	scene.main = page.main;
-	if (navigator.userAgent.match(/\b(?:Mobile|[Aa]ndroid|iPhone|iPad)\b/))
-		toast("正在使用移动设备访问，加载可能会较缓慢或导致内存不足。", 3000);
+	if (navigator.userAgent.match(/\b(?:Mobile|Android|iPhone|iPad)\b/i))
+		toast("正在移动设备上访问，加载可能会较缓慢或导致内存不足。", 5000);
 });
